@@ -1,0 +1,39 @@
+# RentComPro .gitignore
+
+# Sensitive credentials
+SUPABASE_CREDENTIALS.md
+.env
+.env.local
+.env.production
+*.key
+*.pem
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production
+build/
+dist/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.bak
+*.tmp
+*.temp
+database_schema.sql
