@@ -5,6 +5,7 @@ import { testDatabaseConnection } from './utils/supabase';
 import { loginHandler } from './auth/login';
 import { logoutHandler } from './auth/logout';
 import { authMiddleware, requireRole } from './middleware/auth';
+import { getDashboardStats, getRecentActivity } from './dashboard/stats';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -87,7 +88,13 @@ app.get('/api/auth/profile', authMiddleware, (c) => {
   });
 });
 
-// Dashboard stats (Only for SUPER_ADMIN and STAFF)
+// Dashboard stats - Real data from Supabase (Only for SUPER_ADMIN and STAFF)
+app.get('/api/dashboard/stats', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getDashboardStats);
+
+// Recent activity feed (Only for SUPER_ADMIN and STAFF)
+app.get('/api/dashboard/activity', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getRecentActivity);
+
+// Legacy dashboard endpoint (kept for backwards compatibility)
 app.get('/api/dashboard', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), (c) => {
   const user = c.get('user') as JWTPayload;
   
@@ -97,13 +104,7 @@ app.get('/api/dashboard', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), (
     data: {
       message: `Welcome ${user.email}!`,
       role: user.role,
-      stats: {
-        totalDevices: 0,
-        activeDevices: 0,
-        totalClients: 0,
-        pendingPayments: 0,
-      },
-      note: 'This is a protected route. Only admins can access this.',
+      note: 'Use /api/dashboard/stats for real statistics',
     },
   });
 });

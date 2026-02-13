@@ -266,12 +266,12 @@
       loadDashboardData(token);
     }
     
-    // Load dashboard data from API
+    // Load dashboard data from API (Real Supabase Data)
     async function loadDashboardData(token) {
       const messageEl = document.getElementById('message');
       
       try {
-        const response = await fetch(`${API_URL}/api/dashboard`, {
+        const response = await fetch(`${API_URL}/api/dashboard/stats`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -282,11 +282,22 @@
         const data = await response.json();
         
         if (data.success) {
-          // Update stats
-          document.getElementById('totalDevices').textContent = data.data.stats.totalDevices;
-          document.getElementById('activeDevices').textContent = data.data.stats.activeDevices;
-          document.getElementById('totalClients').textContent = data.data.stats.totalClients;
-          document.getElementById('pendingPayments').textContent = '₹' + data.data.stats.pendingPayments;
+          // Update stats with real data from Supabase
+          const stats = data.data.stats;
+          document.getElementById('totalDevices').textContent = stats.totalDevices;
+          document.getElementById('activeDevices').textContent = stats.activeDevices;
+          document.getElementById('totalClients').textContent = stats.totalClients;
+          document.getElementById('pendingPayments').textContent = '₹' + stats.pendingPayments;
+          
+          // Show success message
+          messageEl.textContent = '✅ Dashboard loaded with live data from Supabase';
+          messageEl.className = 'message success';
+          messageEl.style.display = 'block';
+          
+          // Hide message after 3 seconds
+          setTimeout(() => {
+            messageEl.style.display = 'none';
+          }, 3000);
         } else {
           // Token might be invalid
           if (response.status === 401) {
@@ -301,15 +312,9 @@
         }
       } catch (error) {
         console.error('Dashboard load error:', error);
-        messageEl.textContent = '⚠️ Could not connect to backend. Using demo data.';
+        messageEl.textContent = '⚠️ Could not connect to backend.';
         messageEl.className = 'message error';
         messageEl.style.display = 'block';
-        
-        // Show demo data
-        document.getElementById('totalDevices').textContent = '3';
-        document.getElementById('activeDevices').textContent = '0';
-        document.getElementById('totalClients').textContent = '1';
-        document.getElementById('pendingPayments').textContent = '₹0';
       }
     }
     
