@@ -25,6 +25,9 @@
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     
     .navbar h1 {
@@ -47,6 +50,14 @@
       font-size: 14px;
     }
     
+    .user-role {
+      background: rgba(255,255,255,0.3);
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
     .logout-btn {
       background: rgba(255,255,255,0.3);
       border: 2px solid white;
@@ -64,80 +75,158 @@
     }
     
     .container {
-      max-width: 1200px;
-      margin: 40px auto;
+      max-width: 1400px;
+      margin: 30px auto;
       padding: 0 20px;
     }
     
-    .welcome-card {
+    .welcome-section {
       background: white;
-      padding: 30px;
+      padding: 25px 30px;
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     
-    .welcome-card h2 {
+    .welcome-section h2 {
       color: #333;
-      margin-bottom: 10px;
+      font-size: 28px;
+      margin-bottom: 5px;
     }
     
-    .welcome-card p {
+    .welcome-section p {
       color: #666;
-      line-height: 1.6;
+      font-size: 14px;
+    }
+    
+    .last-updated {
+      text-align: right;
+      color: #999;
+      font-size: 13px;
     }
     
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 20px;
       margin-bottom: 30px;
     }
     
     .stat-card {
       background: white;
-      padding: 25px;
+      padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      transition: transform 0.3s;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
     }
     
     .stat-card:hover {
       transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
     }
     
+    .stat-card.primary { border-left-color: #667eea; }
+    .stat-card.success { border-left-color: #10b981; }
+    .stat-card.warning { border-left-color: #f59e0b; }
+    .stat-card.danger { border-left-color: #ef4444; }
+    .stat-card.info { border-left-color: #3b82f6; }
+    
     .stat-card .icon {
-      font-size: 40px;
+      font-size: 32px;
       margin-bottom: 10px;
+      opacity: 0.8;
     }
     
     .stat-card .label {
       color: #666;
-      font-size: 14px;
-      margin-bottom: 5px;
+      font-size: 13px;
+      margin-bottom: 8px;
+      font-weight: 500;
     }
     
     .stat-card .value {
       color: #333;
-      font-size: 32px;
+      font-size: 28px;
       font-weight: 700;
+    }
+    
+    .two-column {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .section {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .section h3 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .activity-item {
+      padding: 12px;
+      border-left: 3px solid #e5e7eb;
+      margin-bottom: 10px;
+      background: #f9fafb;
+      border-radius: 5px;
+      transition: all 0.2s;
+    }
+    
+    .activity-item:hover {
+      background: #f3f4f6;
+      border-left-color: #667eea;
+    }
+    
+    .activity-item.payment {
+      border-left-color: #10b981;
+    }
+    
+    .activity-item.device {
+      border-left-color: #3b82f6;
+    }
+    
+    .activity-message {
+      color: #333;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    
+    .activity-time {
+      color: #999;
+      font-size: 12px;
     }
     
     .quick-actions {
       background: white;
-      padding: 30px;
+      padding: 25px;
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
     }
     
     .quick-actions h3 {
       color: #333;
       margin-bottom: 20px;
+      font-size: 18px;
     }
     
     .actions-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 15px;
     }
     
@@ -148,33 +237,69 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
-      transition: transform 0.2s;
+      transition: all 0.2s;
       text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
     
     .action-btn:hover {
       transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
     }
     
     .message {
-      padding: 15px;
+      padding: 15px 20px;
       border-radius: 8px;
       margin-bottom: 20px;
       display: none;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     .message.success {
       background: #d4edda;
       color: #155724;
-      border: 1px solid #c3e6cb;
+      border-left: 4px solid #28a745;
     }
     
     .message.error {
       background: #f8d7da;
       color: #721c24;
-      border: 1px solid #f5c6cb;
+      border-left: 4px solid #dc3545;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-size: 14px;
+    }
+    
+    .empty-state .icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+      opacity: 0.5;
     }
   </style>
 </head>
@@ -182,6 +307,7 @@
   <nav class="navbar">
     <h1>🔐 RentComPro</h1>
     <div class="user-info">
+      <div class="user-role" id="userRole">Loading...</div>
       <div class="user-email" id="userEmail">Loading...</div>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
@@ -190,52 +316,130 @@
   <div class="container">
     <div id="message" class="message"></div>
     
-    <div class="welcome-card">
-      <h2>Welcome to RentComPro Dashboard! 👋</h2>
-      <p>Manage your rental devices, clients, and payments all in one place.</p>
-      <p><strong>Role:</strong> <span id="userRole">Loading...</span></p>
+    <div class="welcome-section">
+      <div>
+        <h2>Welcome Back! 👋</h2>
+        <p>Here's what's happening with your rental business today</p>
+      </div>
+      <div class="last-updated">
+        <small>Last updated: <span id="lastUpdated">Loading...</span></small>
+      </div>
     </div>
 
+    <!-- Main Stats Grid -->
     <div class="stats-grid">
-      <div class="stat-card">
+      <div class="stat-card primary">
         <div class="icon">💻</div>
         <div class="label">Total Devices</div>
-        <div class="value" id="totalDevices">0</div>
+        <div class="value" id="totalDevices">-</div>
       </div>
       
-      <div class="stat-card">
+      <div class="stat-card success">
         <div class="icon">✅</div>
-        <div class="label">Active Devices</div>
-        <div class="value" id="activeDevices">0</div>
+        <div class="label">Deployed Devices</div>
+        <div class="value" id="activeDevices">-</div>
       </div>
       
-      <div class="stat-card">
+      <div class="stat-card info">
+        <div class="icon">📦</div>
+        <div class="label">Available Devices</div>
+        <div class="value" id="availableDevices">-</div>
+      </div>
+      
+      <div class="stat-card warning">
+        <div class="icon">🔧</div>
+        <div class="label">In Maintenance</div>
+        <div class="value" id="maintenanceDevices">-</div>
+      </div>
+      
+      <div class="stat-card primary">
         <div class="icon">👥</div>
         <div class="label">Total Clients</div>
-        <div class="value" id="totalClients">0</div>
+        <div class="value" id="totalClients">-</div>
       </div>
       
-      <div class="stat-card">
+      <div class="stat-card success">
+        <div class="icon">✔️</div>
+        <div class="label">Active Clients</div>
+        <div class="value" id="activeClients">-</div>
+      </div>
+      
+      <div class="stat-card danger">
+        <div class="icon">⚠️</div>
+        <div class="label">Overdue Clients</div>
+        <div class="value" id="overdueClients">-</div>
+      </div>
+      
+      <div class="stat-card success">
         <div class="icon">💰</div>
+        <div class="label">Total Revenue</div>
+        <div class="value" id="totalRevenue">₹-</div>
+      </div>
+      
+      <div class="stat-card warning">
+        <div class="icon">💸</div>
         <div class="label">Pending Payments</div>
-        <div class="value" id="pendingPayments">₹0</div>
+        <div class="value" id="pendingPayments">₹-</div>
+      </div>
+      
+      <div class="stat-card info">
+        <div class="icon">📅</div>
+        <div class="label">This Month Collection</div>
+        <div class="value" id="paymentsThisMonth">₹-</div>
       </div>
     </div>
 
+    <!-- Two Column Layout -->
+    <div class="two-column">
+      <!-- Recent Activity -->
+      <div class="section">
+        <h3>📋 Recent Activity</h3>
+        <div id="activityList">
+          <div class="loading">Loading activities...</div>
+        </div>
+      </div>
+      
+      <!-- Quick Stats Summary -->
+      <div class="section">
+        <h3>📊 Quick Summary</h3>
+        <div style="padding: 10px 0;">
+          <div style="margin-bottom: 20px;">
+            <div style="color: #666; font-size: 13px; margin-bottom: 5px;">Deployment Rate</div>
+            <div style="color: #333; font-size: 20px; font-weight: 600;" id="deploymentRate">-</div>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <div style="color: #666; font-size: 13px; margin-bottom: 5px;">Client Health</div>
+            <div style="color: #333; font-size: 20px; font-weight: 600;" id="clientHealth">-</div>
+          </div>
+          <div>
+            <div style="color: #666; font-size: 13px; margin-bottom: 5px;">Payment Status</div>
+            <div style="color: #333; font-size: 20px; font-weight: 600;" id="paymentStatus">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
     <div class="quick-actions">
-      <h3>Quick Actions</h3>
+      <h3>⚡ Quick Actions</h3>
       <div class="actions-grid">
         <button class="action-btn" onclick="alert('Add Device - Coming in Module 1.3')">
-          ➕ Add Device
+          <span>➕</span> Add Device
         </button>
         <button class="action-btn" onclick="alert('Register Client - Coming in Module 1.3')">
-          👤 Register Client
+          <span>👤</span> Register Client
         </button>
         <button class="action-btn" onclick="alert('Record Payment - Coming in Module 1.4')">
-          💵 Record Payment
+          <span>💵</span> Record Payment
         </button>
-        <button class="action-btn" onclick="alert('View Reports - Coming in Module 1.6')">
-          📊 View Reports
+        <button class="action-btn" onclick="alert('View All Devices - Coming in Module 1.3')">
+          <span>📱</span> View Devices
+        </button>
+        <button class="action-btn" onclick="alert('Client Management - Coming in Module 1.3')">
+          <span>👥</span> Manage Clients
+        </button>
+        <button class="action-btn" onclick="alert('Generate Reports - Coming in Module 1.6')">
+          <span>📊</span> Reports
         </button>
       </div>
     </div>
@@ -252,21 +456,19 @@
       const user = localStorage.getItem('user');
       
       if (!token || !user) {
-        // Not logged in, redirect to login
         window.location.href = '/index.html';
         return;
       }
       
-      // Display user info
       const userData = JSON.parse(user);
       document.getElementById('userEmail').textContent = userData.email;
       document.getElementById('userRole').textContent = userData.role;
       
-      // Load dashboard data
       loadDashboardData(token);
+      loadRecentActivity(token);
     }
     
-    // Load dashboard data from API (Real Supabase Data)
+    // Load dashboard stats from API
     async function loadDashboardData(token) {
       const messageEl = document.getElementById('message');
       
@@ -282,32 +484,48 @@
         const data = await response.json();
         
         if (data.success) {
-          // Update stats with real data from Supabase
           const stats = data.data.stats;
+          
+          // Update all stats
           document.getElementById('totalDevices').textContent = stats.totalDevices;
           document.getElementById('activeDevices').textContent = stats.activeDevices;
+          document.getElementById('availableDevices').textContent = stats.availableDevices;
+          document.getElementById('maintenanceDevices').textContent = stats.maintenanceDevices;
           document.getElementById('totalClients').textContent = stats.totalClients;
-          document.getElementById('pendingPayments').textContent = '₹' + stats.pendingPayments;
+          document.getElementById('activeClients').textContent = stats.activeClients;
+          document.getElementById('overdueClients').textContent = stats.overdueClients;
+          document.getElementById('totalRevenue').textContent = '₹' + stats.totalRevenue.toFixed(2);
+          document.getElementById('pendingPayments').textContent = '₹' + stats.pendingPayments.toFixed(2);
+          document.getElementById('paymentsThisMonth').textContent = '₹' + stats.paymentsThisMonth.toFixed(2);
           
-          // Show success message
+          // Calculate summaries
+          const deploymentRate = stats.totalDevices > 0 
+            ? Math.round((stats.activeDevices / stats.totalDevices) * 100) + '%'
+            : '0%';
+          document.getElementById('deploymentRate').textContent = deploymentRate;
+          
+          const clientHealth = stats.totalClients > 0
+            ? Math.round((stats.activeClients / stats.totalClients) * 100) + '% Active'
+            : 'No Clients';
+          document.getElementById('clientHealth').textContent = clientHealth;
+          
+          const paymentStatus = stats.overdueClients === 0 ? 'All Clear ✓' : `${stats.overdueClients} Overdue`;
+          document.getElementById('paymentStatus').textContent = paymentStatus;
+          
+          // Update timestamp
+          const lastUpdated = new Date(data.data.lastUpdated).toLocaleString();
+          document.getElementById('lastUpdated').textContent = lastUpdated;
+          
           messageEl.textContent = '✅ Dashboard loaded with live data from Supabase';
           messageEl.className = 'message success';
           messageEl.style.display = 'block';
-          
-          // Hide message after 3 seconds
-          setTimeout(() => {
-            messageEl.style.display = 'none';
-          }, 3000);
+          setTimeout(() => messageEl.style.display = 'none', 3000);
         } else {
-          // Token might be invalid
           if (response.status === 401) {
             messageEl.textContent = '⚠️ Session expired. Please login again.';
             messageEl.className = 'message error';
             messageEl.style.display = 'block';
-            
-            setTimeout(() => {
-              logout();
-            }, 2000);
+            setTimeout(() => logout(), 2000);
           }
         }
       } catch (error) {
@@ -318,11 +536,53 @@
       }
     }
     
+    // Load recent activity
+    async function loadRecentActivity(token) {
+      const activityList = document.getElementById('activityList');
+      
+      try {
+        const response = await fetch(`${API_URL}/api/dashboard/activity`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.data.activities.length > 0) {
+          activityList.innerHTML = data.data.activities.map(activity => {
+            const time = new Date(activity.timestamp).toLocaleString();
+            return `
+              <div class="activity-item ${activity.type}">
+                <div class="activity-message">${activity.message}</div>
+                <div class="activity-time">${time}</div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          activityList.innerHTML = `
+            <div class="empty-state">
+              <div class="icon">📭</div>
+              <div>No recent activity</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Activity load error:', error);
+        activityList.innerHTML = `
+          <div class="empty-state">
+            <div>Could not load activities</div>
+          </div>
+        `;
+      }
+    }
+    
     // Logout function
     async function logout() {
       const token = localStorage.getItem('token');
       
-      // Call logout API (optional)
       if (token) {
         try {
           await fetch(`${API_URL}/api/auth/logout`, {
@@ -337,15 +597,11 @@
         }
       }
       
-      // Clear local storage
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
-      // Redirect to login
       window.location.href = '/index.html';
     }
     
-    // Run on page load
     checkAuth();
   </script>
 </body>
