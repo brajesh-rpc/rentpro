@@ -4,7 +4,8 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "backend",
+	"account_id": "c12bce08353b5080a33ab8ecdb746449",
+	"name": "rentcompro-backend",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-02-10",
 	"observability": {
