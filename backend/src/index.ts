@@ -6,6 +6,9 @@ import { loginHandler } from './auth/login';
 import { logoutHandler } from './auth/logout';
 import { authMiddleware, requireRole } from './middleware/auth';
 import { getDashboardStats, getRecentActivity } from './dashboard/stats';
+import { receiveDeviceStats, registerDevice } from './devices/stats';
+import { addDevice, getDevices } from './devices/management';
+import { registerClient, getClients } from './clients/management';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -65,6 +68,18 @@ app.get('/api/test-connection', async (c) => {
 
 // Login endpoint
 app.post('/api/auth/login', loginHandler);
+
+// Device endpoints (Public - no auth required for agents)
+app.post('/api/devices/stats', receiveDeviceStats);
+app.post('/api/devices/register', registerDevice);
+
+// Device Management (Protected - Admin only)
+app.post('/api/devices', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), addDevice);
+app.get('/api/devices', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getDevices);
+
+// Client Management (Protected - Admin only)
+app.post('/api/clients', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), registerClient);
+app.get('/api/clients', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getClients);
 
 // Logout endpoint
 app.post('/api/auth/logout', logoutHandler);
