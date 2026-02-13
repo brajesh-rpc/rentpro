@@ -1,0 +1,16 @@
+# Cloudflare Pages configuration
+# This file is optional - you can also deploy via dashboard
+
+# Project name
+name = "rentcompro-frontend"
+
+# Pages configuration
+pages_build_output_dir = "."
+
+# Compatibility date
+compatibility_date = "2026-02-10"
+
+# Custom domains (add after deployment)
+# routes = [
+#   { pattern = "rentcompro.com", custom_domain = true }
+# ]
