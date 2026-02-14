@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Client - RentComPro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+    }
+    
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px 30px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .navbar h1 {
+      font-size: 24px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    
+    .nav-links a:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    
+    .client-header {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+    
+    .client-name {
+      font-size: 32px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    
+    .status-badge.active {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-badge.overdue {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .status-badge.inactive {
+      background: #e5e7eb;
+      color: #6b7280;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+    
+    .info-section {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+    
+    .info-item {
+      margin-bottom: 15px;
+    }
+    
+    .info-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    
+    .info-value {
+      font-size: 16px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #10b981;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #059669;
+    }
+    
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background: #d97706;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <h1>🔐 RentComPro</h1>
+    <div class="nav-links">
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/manage-clients.html">← Back to Clients</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="clientContent" class="loading">Loading client details...</div>
+  </div>
+
+  <script>
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_URL = isLocal ? 'http://localhost:8787' : 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
+
+    // Get client ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const clientId = urlParams.get('id');
+
+    if (!clientId) {
+      window.location.href = '/manage-clients.html';
+    }
+
+    // Load client data
+    async function loadClientData() {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          displayClientData(data.data);
+        } else {
+          alert('Failed to load client data');
+          window.location.href = '/manage-clients.html';
+        }
+      } catch (error) {
+        console.error('Load client error:', error);
+        alert('Failed to load client data');
+        window.location.href = '/manage-clients.html';
+      }
+    }
+
+    // Display client data
+    function displayClientData(client) {
+      const statusClass = client.status === 'OVERDUE' ? 'overdue' : 
+                         client.status === 'INACTIVE' ? 'inactive' : 'active';
+
+      const html = `
+        <div class="client-header">
+          <div class="client-name">${client.company_name}</div>
+          <span class="status-badge ${statusClass}">${client.status}</span>
+          
+          <div class="action-buttons">
+            <a href="/edit-client.html?id=${client.id}" class="btn btn-secondary">
+              ✏️ Edit Client
+            </a>
+            <a href="/manage-assets.html?clientId=${client.id}" class="btn btn-warning">
+              📦 Manage Assets
+            </a>
+            <a href="/manage-clients.html" class="btn btn-primary">
+              ← Back to Clients
+            </a>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <!-- Company Info -->
+          <div class="info-section">
+            <div class="section-title">🏢 Company Information</div>
+            <div class="info-item">
+              <div class="info-label">Company Name</div>
+              <div class="info-value">${client.company_name}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Owner Name</div>
+              <div class="info-value">${client.owner_name}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Business Type</div>
+              <div class="info-value">${client.business_type || 'N/A'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">GST Number</div>
+              <div class="info-value">${client.gst_number || 'N/A'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">PAN Number</div>
+              <div class="info-value">${client.pan_number || 'N/A'}</div>
+            </div>
+          </div>
+
+          <!-- Contact Info -->
+          <div class="info-section">
+            <div class="section-title">📞 Contact Information</div>
+            <div class="info-item">
+              <div class="info-label">Primary Phone</div>
+              <div class="info-value">${client.phone}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Alternate Phone</div>
+              <div class="info-value">${client.alternate_phone || 'N/A'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Email</div>
+              <div class="info-value">${client.email || 'N/A'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">WhatsApp</div>
+              <div class="info-value">${client.whatsapp || 'N/A'}</div>
+            </div>
+          </div>
+
+          <!-- Address Info -->
+          <div class="info-section">
+            <div class="section-title">📍 Office Address</div>
+            <div class="info-item">
+              <div class="info-label">Address</div>
+              <div class="info-value">${client.office_address}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Landmark</div>
+              <div class="info-value">${client.landmark || 'N/A'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">City</div>
+              <div class="info-value">${client.city}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">State</div>
+              <div class="info-value">${client.state}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Pincode</div>
+              <div class="info-value">${client.pincode}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Landlord Contact</div>
+              <div class="info-value">${client.landlord_contact || 'N/A'}</div>
+            </div>
+          </div>
+
+          <!-- Financial Info -->
+          <div class="info-section">
+            <div class="section-title">💰 Financial Terms</div>
+            <div class="info-item">
+              <div class="info-label">Credit Limit</div>
+              <div class="info-value">₹${client.credit_limit || 0}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Security Deposit</div>
+              <div class="info-value">₹${client.security_deposit || 0}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Late Penalty</div>
+              <div class="info-value">${client.late_penalty_percent || 0}%</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Status</div>
+              <div class="info-value">${client.status}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('clientContent').innerHTML = html;
+    }
+
+    // Load client data on page load
+    loadClientData();
+  </script>
+</body>
+</html>
