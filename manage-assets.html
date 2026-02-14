@@ -310,6 +310,14 @@
       <div class="add-asset-form">
         <div class="form-row">
           <div class="form-group">
+            <label>Action</label>
+            <select id="actionType" onchange="toggleAction()">
+              <option value="ADD">Add Items</option>
+              <option value="REMOVE">Remove Items</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label>Item Type</label>
             <select id="itemType">
               <option value="">Select Item</option>
@@ -331,7 +339,7 @@
             <input type="number" id="quantity" min="1" value="1">
           </div>
           
-          <div class="form-group">
+          <div class="form-group" id="rentField">
             <label>Monthly Rent (₹)</label>
             <input type="number" id="monthlyRent" min="0" step="100" value="1000">
           </div>
@@ -343,8 +351,8 @@
           
           <div class="form-group">
             <label>&nbsp;</label>
-            <button class="btn btn-primary" onclick="addAsset()">
-              ➕ Add
+            <button class="btn btn-primary" id="submitBtn" onclick="processAsset()">
+              ➕ Add Items
             </button>
           </div>
         </div>
@@ -441,7 +449,7 @@
               <div class="asset-rent">₹${item.monthly_rent}/month each</div>
               <div class="asset-rent">Total: ₹${item.quantity * item.monthly_rent}/month</div>
               <button class="btn btn-danger" style="margin-top: 10px; width: 100%;" 
-                      onclick="removeAsset('${item.id}', '${item.item_type}', ${item.quantity})">
+                      onclick="removeAssetFromCard('${item.id}', '${item.item_type}', ${item.quantity})">
                 🗑️ Remove
               </button>
             </div>
@@ -521,6 +529,34 @@
       }
     }
 
+    // Toggle action (Add/Remove)
+    function toggleAction() {
+      const actionType = document.getElementById('actionType').value;
+      const submitBtn = document.getElementById('submitBtn');
+      const rentField = document.getElementById('rentField');
+      
+      if (actionType === 'ADD') {
+        submitBtn.innerHTML = '➕ Add Items';
+        submitBtn.className = 'btn btn-primary';
+        rentField.style.display = 'flex';
+      } else {
+        submitBtn.innerHTML = '🗑️ Remove Items';
+        submitBtn.className = 'btn btn-danger';
+        rentField.style.display = 'none';
+      }
+    }
+
+    // Process asset (Add or Remove based on action type)
+    async function processAsset() {
+      const actionType = document.getElementById('actionType').value;
+      
+      if (actionType === 'ADD') {
+        await addAsset();
+      } else {
+        await removeAssetByType();
+      }
+    }
+
     // Add asset
     async function addAsset() {
       const itemType = document.getElementById('itemType').value;
@@ -579,18 +615,61 @@
       }
     }
 
-    // Remove asset
-    async function removeAsset(itemId, itemType, currentQuantity) {
-      const quantity = prompt(`How many ${itemType}(s) to remove? (Current: ${currentQuantity})`);
+    // Remove asset by type (from form)
+    async function removeAssetByType() {
+      const itemType = document.getElementById('itemType').value;
+      const quantity = parseInt(document.getElementById('quantity').value);
+      const effectiveDate = document.getElementById('effectiveDate').value;
+
+      if (!itemType || !quantity || !effectiveDate) {
+        showMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      // Find the item in current assets
+      const token = localStorage.getItem('token');
       
-      if (!quantity || quantity <= 0 || quantity > currentQuantity) {
-        return;
-      }
+      try {
+        const response = await fetch(`${API_URL}/api/rental-items/client/${clientId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (!confirm(`Remove ${quantity} ${itemType}(s)?`)) {
-        return;
-      }
+        const data = await response.json();
 
+        if (data.success && data.data.length > 0) {
+          const item = data.data.find(i => i.item_type === itemType);
+          
+          if (!item) {
+            showMessage(`No ${itemType} items found for this client`, 'error');
+            return;
+          }
+
+          if (quantity > item.quantity) {
+            showMessage(`Cannot remove ${quantity} items. Only ${item.quantity} available.`, 'error');
+            return;
+          }
+
+          if (!confirm(`Remove ${quantity} ${itemType}(s)?`)) {
+            return;
+          }
+
+          // Proceed with removal
+          await removeAsset(item.id, itemType, quantity, effectiveDate);
+        } else {
+          showMessage('No items found for this client', 'error');
+        }
+      } catch (error) {
+        console.error('Find item error:', error);
+        showMessage('❌ Failed to find item', 'error');
+      }
+    }
+
+    // Remove asset (internal function)
+    async function removeAsset(itemId, itemType, quantity, effectiveDate) {
       const token = localStorage.getItem('token');
       const messageEl = document.getElementById('message');
 
@@ -607,7 +686,7 @@
           },
           body: JSON.stringify({
             quantity: parseInt(quantity),
-            effectiveDate: new Date().toISOString().split('T')[0]
+            effectiveDate: effectiveDate || new Date().toISOString().split('T')[0]
           }),
         });
 
@@ -615,6 +694,10 @@
 
         if (data.success) {
           showMessage(`✅ ${quantity} ${itemType}(s) removed successfully!`, 'success');
+          
+          // Reset form
+          document.getElementById('itemType').value = '';
+          document.getElementById('quantity').value = '1';
           
           // Reload data
           await loadCurrentAssets();
@@ -626,6 +709,21 @@
         console.error('Remove asset error:', error);
         showMessage('❌ Failed to remove rental item', 'error');
       }
+    }
+
+    // Remove asset button (from card)
+    async function removeAssetFromCard(itemId, itemType, currentQuantity) {
+      const quantity = prompt(`How many ${itemType}(s) to remove? (Current: ${currentQuantity})`);
+      
+      if (!quantity || quantity <= 0 || quantity > currentQuantity) {
+        return;
+      }
+
+      if (!confirm(`Remove ${quantity} ${itemType}(s)?`)) {
+        return;
+      }
+
+      await removeAsset(itemId, itemType, parseInt(quantity), new Date().toISOString().split('T')[0]);
     }
 
     // Show message
