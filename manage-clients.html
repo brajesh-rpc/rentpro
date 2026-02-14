@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Clients - RentComPro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+    }
+    
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px 30px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .navbar h1 {
+      font-size: 24px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    
+    .nav-links a:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .header-section h2 {
+      color: #333;
+      font-size: 28px;
+    }
+    
+    .btn-add {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    
+    .btn-add:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .search-bar {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    
+    .search-bar input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .search-bar input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .clients-grid {
+      display: grid;
+      gap: 20px;
+    }
+    
+    .client-card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+      border-left: 4px solid #667eea;
+    }
+    
+    .client-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .client-card.overdue {
+      border-left-color: #ef4444;
+    }
+    
+    .client-card.inactive {
+      border-left-color: #9ca3af;
+      opacity: 0.7;
+    }
+    
+    .client-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 15px;
+    }
+    
+    .client-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    
+    .client-owner {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .status-badge.active {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-badge.overdue {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .status-badge.inactive {
+      background: #e5e7eb;
+      color: #6b7280;
+    }
+    
+    .client-info {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .info-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+    }
+    
+    .info-value {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .client-actions {
+      display: flex;
+      gap: 10px;
+      padding-top: 15px;
+      border-top: 1px solid #e5e7eb;
+    }
+    
+    .btn-action {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-view {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .btn-view:hover {
+      background: #2563eb;
+    }
+    
+    .btn-edit {
+      background: #10b981;
+      color: white;
+    }
+    
+    .btn-edit:hover {
+      background: #059669;
+    }
+    
+    .btn-assets {
+      background: #f59e0b;
+      color: white;
+    }
+    
+    .btn-assets:hover {
+      background: #d97706;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: #999;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px;
+      background: white;
+      border-radius: 10px;
+    }
+    
+    .empty-state .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <h1>🔐 RentComPro</h1>
+    <div class="nav-links">
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/manage-clients.html">Manage Clients</a>
+      <a href="/add-device.html">Add Device</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="header-section">
+      <h2>👥 Manage Clients</h2>
+      <a href="/register-client.html" class="btn-add">
+        <span>➕</span> Add New Client
+      </a>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Search by company name, owner, phone, or city...">
+    </div>
+
+    <div id="clientsList" class="clients-grid">
+      <div class="loading">Loading clients...</div>
+    </div>
+  </div>
+
+  <script>
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_URL = isLocal ? 'http://localhost:8787' : 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
+
+    let allClients = [];
+
+    // Load clients on page load
+    async function loadClients() {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/api/clients`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          allClients = data.data;
+          displayClients(allClients);
+        } else {
+          document.getElementById('clientsList').innerHTML = `
+            <div class="empty-state">
+              <div class="icon">❌</div>
+              <div>Failed to load clients</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Load clients error:', error);
+        document.getElementById('clientsList').innerHTML = `
+          <div class="empty-state">
+            <div class="icon">⚠️</div>
+            <div>Could not connect to server</div>
+          </div>
+        `;
+      }
+    }
+
+    // Display clients
+    function displayClients(clients) {
+      const listEl = document.getElementById('clientsList');
+
+      if (clients.length === 0) {
+        listEl.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📭</div>
+            <div>No clients found</div>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = clients.map(client => {
+        const statusClass = client.status === 'OVERDUE' ? 'overdue' : 
+                           client.status === 'INACTIVE' ? 'inactive' : 'active';
+
+        return `
+          <div class="client-card ${statusClass}">
+            <div class="client-header">
+              <div>
+                <div class="client-name">${client.company_name}</div>
+                <div class="client-owner">Owner: ${client.owner_name}</div>
+              </div>
+              <span class="status-badge ${statusClass}">
+                ${client.status}
+              </span>
+            </div>
+
+            <div class="client-info">
+              <div class="info-item">
+                <span class="info-label">Phone</span>
+                <span class="info-value">${client.phone}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Location</span>
+                <span class="info-value">${client.city}, ${client.state}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Business Type</span>
+                <span class="info-value">${client.business_type || 'N/A'}</span>
+              </div>
+            </div>
+
+            <div class="client-actions">
+              <button class="btn-action btn-view" onclick="viewClient('${client.id}')">
+                👁️ View Details
+              </button>
+              <button class="btn-action btn-edit" onclick="editClient('${client.id}')">
+                ✏️ Edit
+              </button>
+              <button class="btn-action btn-assets" onclick="manageAssets('${client.id}')">
+                📦 Manage Assets
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      
+      const filtered = allClients.filter(client => {
+        return client.company_name.toLowerCase().includes(searchTerm) ||
+               client.owner_name.toLowerCase().includes(searchTerm) ||
+               client.phone.includes(searchTerm) ||
+               client.city.toLowerCase().includes(searchTerm);
+      });
+
+      displayClients(filtered);
+    });
+
+    // Action functions
+    function viewClient(id) {
+      window.location.href = `/view-client.html?id=${id}`;
+    }
+
+    function editClient(id) {
+      window.location.href = `/edit-client.html?id=${id}`;
+    }
+
+    function manageAssets(id) {
+      window.location.href = `/manage-assets.html?clientId=${id}`;
+    }
+
+    // Load clients on page load
+    loadClients();
+  </script>
+</body>
+</html>

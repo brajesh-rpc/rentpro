@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Assets - RentComPro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+    }
+    
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px 30px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .navbar h1 {
+      font-size: 24px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    
+    .nav-links a:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    
+    .client-info-card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+    
+    .client-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .client-name {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .client-details {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .section-card {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+    
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .current-assets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .asset-item {
+      background: #f9fafb;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .asset-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .asset-quantity {
+      font-size: 28px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+    
+    .asset-rent {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .add-asset-form {
+      background: #f9fafb;
+      padding: 25px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      gap: 15px;
+      align-items: end;
+      margin-bottom: 15px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    input, select {
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+    
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+    
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .history-table th,
+    .history-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .history-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .history-table tr:hover {
+      background: #f9fafb;
+    }
+    
+    .badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .badge.added {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .badge.removed {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .message {
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <h1>🔐 RentComPro</h1>
+    <div class="nav-links">
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/manage-clients.html">← Back to Clients</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="message" class="message"></div>
+    
+    <!-- Client Info -->
+    <div class="client-info-card">
+      <div id="clientInfo" class="loading">Loading client information...</div>
+    </div>
+
+    <!-- Current Assets -->
+    <div class="section-card">
+      <div class="section-title">📦 Current Rental Items</div>
+      <div id="currentAssets" class="current-assets-grid">
+        <div class="loading">Loading assets...</div>
+      </div>
+    </div>
+
+    <!-- Add/Remove Assets -->
+    <div class="section-card">
+      <div class="section-title">➕ Add/Remove Rental Items</div>
+      
+      <div class="add-asset-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Item Type</label>
+            <select id="itemType">
+              <option value="">Select Item</option>
+              <option value="DESKTOP">Desktop Computer</option>
+              <option value="LAPTOP">Laptop</option>
+              <option value="UPS">UPS</option>
+              <option value="MONITOR">Monitor</option>
+              <option value="KEYBOARD">Keyboard</option>
+              <option value="MOUSE">Mouse</option>
+              <option value="HEADSET">Headset</option>
+              <option value="WEBCAM">Webcam</option>
+              <option value="PRINTER">Printer</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="quantity" min="1" value="1">
+          </div>
+          
+          <div class="form-group">
+            <label>Monthly Rent (₹)</label>
+            <input type="number" id="monthlyRent" min="0" step="100" value="1000">
+          </div>
+          
+          <div class="form-group">
+            <label>Effective Date</label>
+            <input type="date" id="effectiveDate">
+          </div>
+          
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button class="btn btn-primary" onclick="addAsset()">
+              ➕ Add
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset History -->
+    <div class="section-card">
+      <div class="section-title">📋 Asset Change History</div>
+      <div id="assetHistory">
+        <div class="loading">Loading history...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_URL = isLocal ? 'http://localhost:8787' : 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
+
+    // Get client ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const clientId = urlParams.get('clientId');
+
+    if (!clientId) {
+      window.location.href = '/manage-clients.html';
+    }
+
+    // Set today's date as default
+    document.getElementById('effectiveDate').valueAsDate = new Date();
+
+    // Load all data
+    async function loadAllData() {
+      await loadClientInfo();
+      await loadCurrentAssets();
+      await loadAssetHistory();
+    }
+
+    // Load client info
+    async function loadClientInfo() {
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          const client = data.data;
+          document.getElementById('clientInfo').innerHTML = `
+            <div class="client-header">
+              <div>
+                <div class="client-name">${client.company_name}</div>
+                <div style="color: #666; margin-top: 5px;">Owner: ${client.owner_name}</div>
+              </div>
+            </div>
+            <div class="client-details">
+              <div>📞 ${client.phone}</div>
+              <div>📍 ${client.city}, ${client.state}</div>
+              <div>🏢 ${client.business_type || 'N/A'}</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Load client error:', error);
+      }
+    }
+
+    // Load current assets
+    async function loadCurrentAssets() {
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch(`${API_URL}/api/rental-items/client/${clientId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.data.length > 0) {
+          const assetsHtml = data.data.map(item => `
+            <div class="asset-item">
+              <div class="asset-name">${item.item_type}</div>
+              <div class="asset-quantity">${item.quantity}</div>
+              <div class="asset-rent">₹${item.monthly_rent}/month each</div>
+              <div class="asset-rent">Total: ₹${item.quantity * item.monthly_rent}/month</div>
+              <button class="btn btn-danger" style="margin-top: 10px; width: 100%;" 
+                      onclick="removeAsset('${item.id}', '${item.item_type}', ${item.quantity})">
+                🗑️ Remove
+              </button>
+            </div>
+          `).join('');
+
+          document.getElementById('currentAssets').innerHTML = assetsHtml;
+        } else {
+          document.getElementById('currentAssets').innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; color: #999; padding: 40px;">
+              No rental items assigned yet
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Load assets error:', error);
+        document.getElementById('currentAssets').innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; color: #ef4444;">
+            Failed to load assets
+          </div>
+        `;
+      }
+    }
+
+    // Load asset history
+    async function loadAssetHistory() {
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch(`${API_URL}/api/rental-items/history/${clientId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.data.length > 0) {
+          const historyHtml = `
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Item Type</th>
+                  <th>Action</th>
+                  <th>Quantity</th>
+                  <th>Monthly Rent</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.data.map(record => `
+                  <tr>
+                    <td>${new Date(record.effective_date).toLocaleDateString()}</td>
+                    <td>${record.item_type}</td>
+                    <td><span class="badge ${record.action}">${record.action}</span></td>
+                    <td>${record.quantity}</td>
+                    <td>₹${record.monthly_rent}</td>
+                    <td>${record.notes || '-'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+
+          document.getElementById('assetHistory').innerHTML = historyHtml;
+        } else {
+          document.getElementById('assetHistory').innerHTML = `
+            <div style="text-align: center; color: #999; padding: 40px;">
+              No history yet
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Load history error:', error);
+      }
+    }
+
+    // Add asset
+    async function addAsset() {
+      const itemType = document.getElementById('itemType').value;
+      const quantity = parseInt(document.getElementById('quantity').value);
+      const monthlyRent = parseFloat(document.getElementById('monthlyRent').value);
+      const effectiveDate = document.getElementById('effectiveDate').value;
+
+      if (!itemType || !quantity || !monthlyRent || !effectiveDate) {
+        showMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      const messageEl = document.getElementById('message');
+
+      try {
+        messageEl.textContent = 'Adding rental item...';
+        messageEl.className = 'message';
+        messageEl.style.display = 'block';
+
+        const response = await fetch(`${API_URL}/api/rental-items`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            clientId,
+            itemType,
+            quantity,
+            monthlyRent,
+            effectiveDate,
+            action: 'ADDED'
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showMessage(`✅ ${quantity} ${itemType}(s) added successfully!`, 'success');
+          
+          // Reset form
+          document.getElementById('itemType').value = '';
+          document.getElementById('quantity').value = '1';
+          document.getElementById('monthlyRent').value = '1000';
+          
+          // Reload data
+          await loadCurrentAssets();
+          await loadAssetHistory();
+        } else {
+          showMessage(`❌ ${data.message}`, 'error');
+        }
+      } catch (error) {
+        console.error('Add asset error:', error);
+        showMessage('❌ Failed to add rental item', 'error');
+      }
+    }
+
+    // Remove asset
+    async function removeAsset(itemId, itemType, currentQuantity) {
+      const quantity = prompt(`How many ${itemType}(s) to remove? (Current: ${currentQuantity})`);
+      
+      if (!quantity || quantity <= 0 || quantity > currentQuantity) {
+        return;
+      }
+
+      if (!confirm(`Remove ${quantity} ${itemType}(s)?`)) {
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      const messageEl = document.getElementById('message');
+
+      try {
+        messageEl.textContent = 'Removing rental item...';
+        messageEl.className = 'message';
+        messageEl.style.display = 'block';
+
+        const response = await fetch(`${API_URL}/api/rental-items/${itemId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            quantity: parseInt(quantity),
+            effectiveDate: new Date().toISOString().split('T')[0]
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showMessage(`✅ ${quantity} ${itemType}(s) removed successfully!`, 'success');
+          
+          // Reload data
+          await loadCurrentAssets();
+          await loadAssetHistory();
+        } else {
+          showMessage(`❌ ${data.message}`, 'error');
+        }
+      } catch (error) {
+        console.error('Remove asset error:', error);
+        showMessage('❌ Failed to remove rental item', 'error');
+      }
+    }
+
+    // Show message
+    function showMessage(text, type) {
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = text;
+      messageEl.className = `message ${type}`;
+      messageEl.style.display = 'block';
+      
+      setTimeout(() => {
+        messageEl.style.display = 'none';
+      }, 5000);
+    }
+
+    // Load all data on page load
+    loadAllData();
+  </script>
+</body>
+</html>

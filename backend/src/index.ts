@@ -8,7 +8,8 @@ import { authMiddleware, requireRole } from './middleware/auth';
 import { getDashboardStats, getRecentActivity } from './dashboard/stats';
 import { receiveDeviceStats, registerDevice } from './devices/stats';
 import { addDevice, getDevices } from './devices/management';
-import { registerClient, getClients } from './clients/management';
+import { registerClient, getClients, getClient, updateClient } from './clients/management';
+import { addRentalItem, getClientRentalItems, getRentalItemHistory, removeRentalItem } from './rental-items/management';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -80,6 +81,14 @@ app.get('/api/devices', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), get
 // Client Management (Protected - Admin only)
 app.post('/api/clients', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), registerClient);
 app.get('/api/clients', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getClients);
+app.get('/api/clients/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getClient);
+app.put('/api/clients/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), updateClient);
+
+// Rental Items Management (Protected - Admin only)
+app.post('/api/rental-items', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), addRentalItem);
+app.get('/api/rental-items/client/:clientId', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getClientRentalItems);
+app.get('/api/rental-items/history/:clientId', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getRentalItemHistory);
+app.delete('/api/rental-items/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), removeRentalItem);
 
 // Logout endpoint
 app.post('/api/auth/logout', logoutHandler);

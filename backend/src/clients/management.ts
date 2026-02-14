@@ -129,3 +129,75 @@ export async function getClients(c: Context<{ Bindings: Env }>): Promise<Respons
     }, 500);
   }
 }
+
+// Get single client
+export async function getClient(c: Context<{ Bindings: Env }>): Promise<Response> {
+  try {
+    const { id } = c.req.param();
+    const supabase = getSupabaseClient(c.env);
+
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      return c.json({
+        success: false,
+        message: 'Client not found'
+      }, 404);
+    }
+
+    return c.json({
+      success: true,
+      data
+    });
+
+  } catch (error) {
+    console.error('Get client error:', error);
+    return c.json({
+      success: false,
+      message: 'Internal server error'
+    }, 500);
+  }
+}
+
+// Update client
+export async function updateClient(c: Context<{ Bindings: Env }>): Promise<Response> {
+  try {
+    const { id } = c.req.param();
+    const body = await c.req.json();
+    const supabase = getSupabaseClient(c.env);
+
+    const { data, error } = await supabase
+      .from('clients')
+      .update({
+        ...body,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      return c.json({
+        success: false,
+        message: 'Failed to update client'
+      }, 500);
+    }
+
+    return c.json({
+      success: true,
+      message: 'Client updated successfully',
+      data
+    });
+
+  } catch (error) {
+    console.error('Update client error:', error);
+    return c.json({
+      success: false,
+      message: 'Internal server error'
+    }, 500);
+  }
+}
