@@ -398,6 +398,9 @@
               <button class="btn-action btn-assets" onclick="manageAssets('${client.id}')">
                 📦 Manage Assets
               </button>
+              <button class="btn-action btn-primary" onclick="generateInvoice('${client.id}')" style="background: #667eea; color: white;">
+                📄 Generate Invoice
+              </button>
             </div>
           </div>
         `;
@@ -429,6 +432,10 @@
 
     function manageAssets(id) {
       window.location.href = `/manage-assets.html?clientId=${id}`;
+    }
+
+    function generateInvoice(id) {
+      window.location.href = `/create-invoice.html?clientId=${id}`;
     }
 
     // Load clients on page load

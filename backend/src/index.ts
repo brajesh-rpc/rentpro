@@ -10,6 +10,7 @@ import { receiveDeviceStats, registerDevice } from './devices/stats';
 import { addDevice, getDevices } from './devices/management';
 import { registerClient, getClients, getClient, updateClient } from './clients/management';
 import { addRentalItem, getClientRentalItems, getRentalItemHistory, removeRentalItem } from './rental-items/management';
+import { getLastInvoice, createInvoice, getInvoices, getInvoice, markInvoicePaid, getClientLastInvoice } from './invoices/management';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -89,6 +90,14 @@ app.post('/api/rental-items', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'
 app.get('/api/rental-items/client/:clientId', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getClientRentalItems);
 app.get('/api/rental-items/history/:clientId', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getRentalItemHistory);
 app.delete('/api/rental-items/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), removeRentalItem);
+
+// Invoice Management (Protected - Admin only)
+app.get('/api/invoices/last', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getLastInvoice);
+app.post('/api/invoices', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), createInvoice);
+app.get('/api/invoices', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getInvoices);
+app.get('/api/invoices/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getInvoice);
+app.post('/api/invoices/:id/pay', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), markInvoicePaid);
+app.get('/api/invoices/client/:clientId/last', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getClientLastInvoice);
 
 // Logout endpoint
 app.post('/api/auth/logout', logoutHandler);

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoices - RentComPro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+    }
+    
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px 30px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .navbar h1 {
+      font-size: 24px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .filters {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    .filter-btn {
+      padding: 10px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .filter-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    
+    .invoices-table {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    thead {
+      background: #f9fafb;
+    }
+    
+    th {
+      padding: 15px;
+      text-align: left;
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    td {
+      padding: 15px;
+      border-bottom: 1px solid #e5e7eb;
+      color: #333;
+    }
+    
+    tr:hover {
+      background: #f9fafb;
+    }
+    
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+    
+    .status-badge.paid {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-badge.unpaid {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-badge.overdue {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .status-badge.partial {
+      background: #cce5ff;
+      color: #004085;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .btn-sm {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-view {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .btn-pay {
+      background: #10b981;
+      color: white;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <h1>🔐 RentComPro</h1>
+    <div class="nav-links">
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/manage-clients.html">Clients</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="header-section">
+      <h2>📄 Invoices</h2>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterInvoices('all')">All</button>
+      <button class="filter-btn" onclick="filterInvoices('PAID')">Paid</button>
+      <button class="filter-btn" onclick="filterInvoices('UNPAID')">Unpaid</button>
+      <button class="filter-btn" onclick="filterInvoices('OVERDUE')">Overdue</button>
+      <button class="filter-btn" onclick="filterInvoices('PARTIAL')">Partial</button>
+    </div>
+
+    <div class="invoices-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Invoice No.</th>
+            <th>Client</th>
+            <th>Date</th>
+            <th>Period</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="invoicesList">
+          <tr>
+            <td colspan="7" class="loading">Loading invoices...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_URL = isLocal ? 'http://localhost:8787' : 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
+
+    let allInvoices = [];
+    let currentFilter = 'all';
+
+    // Load invoices
+    async function loadInvoices() {
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch(`${API_URL}/api/invoices`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          allInvoices = data.data;
+          displayInvoices(allInvoices);
+        }
+      } catch (error) {
+        console.error('Load invoices error:', error);
+      }
+    }
+
+    // Display invoices
+    function displayInvoices(invoices) {
+      const tbody = document.getElementById('invoicesList');
+      
+      if (invoices.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">No invoices found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = invoices.map(inv => {
+        const statusClass = inv.status.toLowerCase();
+        const client = inv.clients;
+        
+        return `
+          <tr>
+            <td><strong>${inv.invoice_number}</strong></td>
+            <td>${client?.company_name || 'N/A'}</td>
+            <td>${formatDate(inv.invoice_date)}</td>
+            <td>${formatDate(inv.period_from)} - ${formatDate(inv.period_to)}</td>
+            <td><strong>₹${inv.total_amount.toFixed(2)}</strong></td>
+            <td><span class="status-badge ${statusClass}">${inv.status}</span></td>
+            <td>
+              <div class="btn-group">
+                <button class="btn-sm btn-view" onclick="viewInvoice('${inv.id}')">👁️ View</button>
+                ${inv.status !== 'PAID' ? 
+                  `<button class="btn-sm btn-pay" onclick="markAsPaid('${inv.id}', ${inv.total_amount})">💰 Pay</button>` 
+                  : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Filter invoices
+    function filterInvoices(status) {
+      currentFilter = status;
+      
+      // Update button states
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      if (status === 'all') {
+        displayInvoices(allInvoices);
+      } else {
+        const filtered = allInvoices.filter(inv => inv.status === status);
+        displayInvoices(filtered);
+      }
+    }
+
+    // Format date
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-IN', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
+      });
+    }
+
+    // View invoice
+    function viewInvoice(id) {
+      window.location.href = `/view-invoice.html?id=${id}`;
+    }
+
+    // Mark as paid
+    function markAsPaid(id, totalAmount) {
+      const paymentDate = prompt('Payment Date (YYYY-MM-DD):');
+      if (!paymentDate) return;
+      
+      const amountPaid = prompt(`Amount Received (Total: ₹${totalAmount}):`);
+      if (!amountPaid) return;
+      
+      const paymentMode = prompt('Payment Mode (Cash/Cheque/NEFT/UPI):');
+      
+      // Save payment
+      savePayment(id, paymentDate, parseFloat(amountPaid), paymentMode);
+    }
+
+    // Save payment
+    async function savePayment(id, paymentDate, amountPaid, paymentMode) {
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch(`${API_URL}/api/invoices/${id}/pay`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            paymentDate,
+            amountPaid,
+            paymentMode
+          }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('✅ Payment recorded successfully!');
+          loadInvoices();
+        } else {
+          alert(`❌ ${data.message}`);
+        }
+      } catch (error) {
+        console.error('Save payment error:', error);
+        alert('❌ Failed to save payment');
+      }
+    }
+
+    // Initialize
+    loadInvoices();
+  </script>
+</body>
+</html>

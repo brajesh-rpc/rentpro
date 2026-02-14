@@ -1,14 +1,38 @@
-# RentComPro - Rental Management System
+# 🔐 RentComPro
 
-> A comprehensive desktop and laptop rental management system designed for telecalling companies in India, with built-in payment enforcement, device monitoring, and anti-theft features.
+**Desktop & Laptop Rental Management System for Telecalling Companies**
+
+A comprehensive rental management system designed specifically for the Indian market, targeting telecalling companies renting computer systems.
 
 ---
 
 ## 🚀 Project Status
 
-**Current Phase:** Module 1.1 ✅ COMPLETE  
-**Production Status:** 🟢 LIVE  
-**Last Updated:** February 13, 2026
+**Current Phase:** Phase 1 - Core Payment Enforcement & Device Monitoring (MVP)
+
+**Completed Modules:**
+- ✅ Module 1.1: Authentication & Authorization
+- ✅ Module 1.2: Enhanced Dashboard with Real-time Stats
+- ✅ Module 1.3: Client Management System
+- ✅ Module 1.4: Asset/Rental Items Management
+- ✅ Module 1.5: Invoice Generation System (GST Support)
+- 🚧 Module 1.6: Payment Tracking & Notifications (In Progress)
+
+---
+
+## 📁 Project Structure
+
+```
+RentComPro/
+├── Frontend/              # HTML/CSS/JS frontend application
+├── backend/              # Cloudflare Workers API
+├── windows-agent/        # Windows Service for device monitoring
+├── docs/                 # Complete project documentation
+│   ├── setup-guides/    # Setup and configuration guides
+│   ├── database/        # Database schemas and migrations
+│   └── design-guides/   # Design and naming conventions
+└── README.md            # This file
+```
 
 ---
 
@@ -18,368 +42,127 @@
 - **Backend API:** https://rentcompro-backend.brajesh-jimmc.workers.dev
 - **GitHub:** https://github.com/brajesh-rpc/rentpro
 
-**Test Credentials:**
-- Email: `admin@rentcompro.com`
-- Password: `password123`
-
----
-
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Technology Stack](#technology-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Development Roadmap](#development-roadmap)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-
----
-
-## 🎯 Overview
-
-RentComPro is a complete rental management solution targeting the Indian telecalling industry. Companies rent budget desktop systems (i5 2nd gen, 4GB RAM, 19" monitors with UPS) to businesses in:
-
-- Loan recovery
-- Insurance sales
-- Ayurvedic medicine sales
-- Credit card sales
-
-### Core Business Problems Solved
-
-1. **Payment Collection Automation** - Automated reminders and payment tracking
-2. **Fraud Prevention** - Real-time device monitoring and location tracking
-3. **Asset Recovery** - Remote device lock/unlock capabilities
-4. **Maintenance Scheduling** - Automated maintenance alerts and tracking
-
----
-
-## ✨ Features
-
-### ✅ Completed (Module 1.1)
-
-- **User Authentication**
-  - Secure login/logout with JWT tokens
-  - Role-based access control (Super Admin, Staff, Client)
-  - Password hashing and verification
-  - 24-hour session management
-
-- **Dashboard**
-  - Stats overview (Devices, Clients, Payments)
-  - User profile management
-  - Logout functionality
-
-- **Backend API**
-  - RESTful API with TypeScript
-  - Supabase database integration
-  - Protected routes with middleware
-  - CORS enabled for frontend access
-
-### 🚧 In Development (Module 1.2)
-
-- Enhanced dashboard with live stats
-- Navigation menu
-- Recent activity feed
-- Quick action buttons
-
-### 📅 Planned Features
-
-- **Device Management** (Module 1.3)
-  - Device registration and tracking
-  - Human-friendly naming (e.g., "Rajesh-i5")
-  - Assignment to clients
-  - Status management
-
-- **Payment Tracking** (Module 1.4)
-  - Payment recording and history
-  - Due date management
-  - Automated alerts for overdue payments
-  - Receipt generation
-
-- **Automated Notifications** (Module 1.5)
-  - SMS and WhatsApp integration
-  - Payment reminders
-  - Custom notification templates
-
-- **Device Monitoring** (Module 1.6)
-  - Real-time hardware stats (CPU, RAM, Disk)
-  - Remote lock/unlock
-  - Offline device alerts
-  - Location tracking
-
 ---
 
 ## 🛠️ Technology Stack
 
-### Backend
-- **Runtime:** Cloudflare Workers
-- **Language:** TypeScript
-- **Framework:** Hono (lightweight web framework)
-- **Database:** Supabase (PostgreSQL)
-- **Authentication:** JWT with jose library
-- **Password Hashing:** Web Crypto API (SHA-256)
-
 ### Frontend
-- **Hosting:** Cloudflare Pages
-- **Framework:** HTML5, CSS3, Vanilla JavaScript
-- **State Management:** localStorage
-- **UI/UX:** Custom gradient design, responsive layout
+- Pure HTML/CSS/JavaScript (No framework)
+- Hosted on Cloudflare Pages
 
-### DevOps
-- **Version Control:** GitHub
-- **Deployment:** Automated via Cloudflare
-- **CI/CD:** GitHub → Cloudflare Pages auto-deploy
+### Backend
+- Cloudflare Workers (Serverless)
+- Hono.js Framework
+- TypeScript
 
-### Future Stack
-- **Desktop App:** Electron or Flutter
-- **Windows Service:** C# (.NET)
-- **Notifications:** MSG91 / TextLocal (SMS), WhatsApp Business API
+### Database
+- Supabase (PostgreSQL)
 
----
-
-## 📁 Project Structure
-
-```
-RentComPro/
-├── backend/                    # Cloudflare Workers backend
-│   ├── src/
-│   │   ├── auth/              # Authentication handlers
-│   │   ├── middleware/        # Auth middleware
-│   │   ├── utils/             # Utility functions
-│   │   ├── types/             # TypeScript types
-│   │   └── index.ts           # Main router
-│   ├── wrangler.jsonc         # Workers configuration
-│   └── package.json           # Dependencies
-│
-├── docs/                       # Project documentation
-│   ├── 01_BUSINESS_OVERVIEW.md
-│   ├── 02_USER_TYPES_AND_ROLES.md
-│   ├── 03_FEATURES_AND_MODULES.md
-│   ├── 04_TECHNICAL_ARCHITECTURE.md
-│   ├── 05_FREE_TOOLS_FINAL_STACK.md
-│   ├── 06_DEVELOPMENT_ROADMAP.md
-│   ├── 07_PHASE1_DETAILED_MODULES.md
-│   └── 08_MODULE_1.1_COMPLETION.md
-│
-├── index.html                  # Login page
-├── dashboard.html              # Dashboard page
-├── database_schema.sql         # Database schema
-└── README.md                   # This file
-```
+### Windows Agent
+- .NET 8.0 Windows Service
+- C#
 
 ---
 
-## 🚀 Getting Started
+## ⚡ Features
 
-### Prerequisites
+### ✅ Implemented
+- User authentication & authorization (SUPER_ADMIN, STAFF, FIELD_AGENT)
+- Real-time dashboard with live statistics
+- Client management (CRUD operations)
+- Rental items management (Mid-month additions/removals)
+- Invoice generation (With/Without GST 18%)
+- Payment tracking (Paid/Unpaid/Overdue/Partial)
+- Asset change history
+- Human-friendly device naming
 
-- Node.js (v20 or higher)
-- npm or yarn
-- Cloudflare account
-- Supabase account
-- GitHub account
+### 🚧 In Progress
+- Windows Service Agent (Device monitoring)
+- Automated payment reminders
+- SMS/WhatsApp notifications
 
-### Local Development Setup
+### 📅 Upcoming
+- Anti-theft features (Device lock/unlock)
+- Business intelligence & analytics
+- Advanced reporting
 
-#### 1. Clone the Repository
+---
 
+## 📖 Documentation
+
+Complete documentation available in the [`docs/`](./docs/) folder:
+
+- [Business Overview](./docs/01_BUSINESS_OVERVIEW.md)
+- [Technical Architecture](./docs/04_TECHNICAL_ARCHITECTURE.md)
+- [Development Roadmap](./docs/06_DEVELOPMENT_ROADMAP.md)
+- [Setup Guides](./docs/setup-guides/)
+- [Database Schema](./docs/database/)
+
+---
+
+## 🚀 Quick Start
+
+### Frontend Development
 ```bash
-git clone https://github.com/brajesh-rpc/rentpro.git
-cd rentpro
-```
-
-#### 2. Backend Setup
-
-```bash
-cd backend
-npm install
-```
-
-Create `wrangler.jsonc` configuration (or update existing):
-
-```json
-{
-  "account_id": "your-cloudflare-account-id",
-  "name": "rentcompro-backend",
-  "vars": {
-    "SUPABASE_URL": "https://your-project.supabase.co",
-    "SUPABASE_ANON_KEY": "your-anon-key",
-    "JWT_SECRET": "your-jwt-secret"
-  }
-}
-```
-
-#### 3. Database Setup
-
-Run the SQL schema in Supabase SQL Editor:
-
-```bash
-# File: database_schema.sql
-```
-
-Create test user:
-
-```bash
-# File: backend/create_test_users.sql
-```
-
-#### 4. Start Local Development
-
-```bash
-# Backend
-cd backend
-npm run dev
-# Runs on http://localhost:8787
-
-# Frontend
+cd Frontend
 # Open index.html in browser
 ```
 
-#### 5. Run Tests
-
+### Backend Development
 ```bash
-# Test backend health
-curl http://localhost:8787/
+cd backend
+npm install
+wrangler dev
+```
 
-# Test Supabase connection
-curl http://localhost:8787/api/test-connection
-
-# Test login
-curl -X POST http://localhost:8787/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@rentcompro.com","password":"password123"}'
+### Windows Agent Development
+```bash
+cd windows-agent/RentComProAgent
+dotnet build
 ```
 
 ---
 
-## 🗺️ Development Roadmap
+## 🔐 Access Credentials
 
-### Phase 1: Core Payment Enforcement & Device Monitoring (MVP)
-**Duration:** 6 weeks  
-**Status:** In Progress (Module 1.1 ✅, Module 1.2 🚧)
+**Test Admin Account:**
+- Email: admin@rentcompro.com
+- Password: password123
 
-- ✅ Module 1.1: Project Setup & Authentication
-- 🚧 Module 1.2: Super Admin Dashboard
-- 📅 Module 1.3: Device Management
-- 📅 Module 1.4: Payment Tracking
-- 📅 Module 1.5: Automated Notifications
-- 📅 Module 1.6: Device Lock/Unlock & Monitoring
-
-### Phase 2: Anti-Theft & Fraud Prevention
-**Duration:** 3-4 weeks  
-**Status:** Planned
-
-- Advanced device tracking
-- Geofencing alerts
-- Screenshot capture
-- Format detection and prevention
-
-### Phase 3: Business Intelligence & Analytics
-**Duration:** 3-4 weeks  
-**Status:** Planned
-
-- Advanced analytics dashboard
-- Revenue forecasting
-- Client behavior analysis
-- Performance metrics
-
-### Phase 4: Scaling & Advanced Features
-**Duration:** 4-5 weeks  
-**Status:** Planned
-
-- Multi-branch management
-- Staff performance tracking
-- Mobile app (optional)
-- API for third-party integrations
-
-**Total Timeline:** 14-19 weeks (3.5-5 months)
+_(For development/testing only)_
 
 ---
 
-## 📚 Documentation
+## 📊 Database
 
-Detailed documentation is available in the `/docs` folder:
+**Provider:** Supabase  
+**Credentials:** See `docs/setup-guides/SUPABASE_CREDENTIALS.md`
 
-1. [Business Overview](docs/01_BUSINESS_OVERVIEW.md) - Pain points, target market, business model
-2. [User Types & Roles](docs/02_USER_TYPES_AND_ROLES.md) - User hierarchy and permissions
-3. [Features & Modules](docs/03_FEATURES_AND_MODULES.md) - Complete feature list
-4. [Technical Architecture](docs/04_TECHNICAL_ARCHITECTURE.md) - System design and decisions
-5. [Technology Stack](docs/05_FREE_TOOLS_FINAL_STACK.md) - Tools and services used
-6. [Development Roadmap](docs/06_DEVELOPMENT_ROADMAP.md) - 4-phase development plan
-7. [Phase 1 Modules](docs/07_PHASE1_DETAILED_MODULES.md) - Detailed breakdown of Module 1.1-1.6
-8. [Module 1.1 Completion](docs/08_MODULE_1.1_COMPLETION.md) - Module 1.1 summary and learnings
-
----
-
-## 🔐 Security
-
-- **Password Security:** SHA-256 hashing for password storage
-- **JWT Tokens:** 24-hour expiry with secret key signing
-- **CORS:** Configured for frontend-backend communication
-- **Role-Based Access:** Different permission levels enforced
-- **Environment Variables:** Sensitive data stored securely
-
----
-
-## 🧪 Testing
-
-### Manual Testing
-- ✅ Local development server
-- ✅ Production deployment
-- ✅ End-to-end authentication flow
-- ✅ Protected routes verification
-- ✅ Database connectivity
-
-### Test Credentials
-- **Email:** admin@rentcompro.com
-- **Password:** password123
-- **Role:** SUPER_ADMIN
+**Tables:**
+- users, clients, devices
+- rental_items, rental_item_history
+- invoices, invoice_items
+- hardware_stats
 
 ---
 
 ## 🤝 Contributing
 
-This is a private project currently in active development. Contributions are not being accepted at this time.
+This is a private project. Development is currently managed by the core team.
 
 ---
 
-## 📄 License
+## 📝 License
 
-This project is proprietary and confidential.  
-© 2026 Brajesh Kumar. All rights reserved.
-
----
-
-## 👨‍💻 Developer
-
-**Brajesh Kumar**  
-Email: brajesh.jimmc@gmail.com  
-GitHub: [@brajesh-rpc](https://github.com/brajesh-rpc)
+Proprietary - All Rights Reserved
 
 ---
 
-## 🙏 Acknowledgments
+## 📞 Contact
 
-- **Cloudflare** - Workers and Pages hosting
-- **Supabase** - Database and backend services
-- **Anthropic Claude** - Development assistance
-
----
-
-## 📝 Changelog
-
-### Version 0.1.0 (February 13, 2026)
-- ✅ Initial project setup
-- ✅ Authentication system implemented
-- ✅ Login/Dashboard UI created
-- ✅ Backend API deployed
-- ✅ Frontend deployed
-- ✅ Supabase integration complete
-- ✅ Module 1.1 complete and production-ready
+**Developer:** Brajesh Kumar  
+**Email:** brajesh.smartdevice@gmail.com
 
 ---
 
-**Last Updated:** February 13, 2026  
-**Project Status:** Active Development  
-**Current Module:** 1.2 - Super Admin Dashboard
+**Last Updated:** February 14, 2026

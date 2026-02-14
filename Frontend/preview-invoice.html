@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview Invoice - RentComPro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+    }
+    
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px 30px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      print: none;
+    }
+    
+    .navbar h1 {
+      font-size: 24px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    
+    .action-bar {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+    
+    .btn {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #333;
+    }
+    
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    
+    .invoice-container {
+      background: white;
+      padding: 50px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #667eea;
+    }
+    
+    .company-info h1 {
+      font-size: 28px;
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    
+    .company-info p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .invoice-title {
+      text-align: right;
+    }
+    
+    .invoice-title h2 {
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .invoice-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+    
+    .bill-to, .invoice-details {
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+    
+    .bill-to h3, .invoice-details h3 {
+      font-size: 14px;
+      color: #999;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+    
+    .bill-to p, .invoice-details p {
+      color: #333;
+      margin-bottom: 5px;
+      font-size: 15px;
+    }
+    
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    
+    .invoice-table thead {
+      background: #f9fafb;
+    }
+    
+    .invoice-table th {
+      padding: 12px;
+      text-align: left;
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .invoice-table th:last-child,
+    .invoice-table td:last-child {
+      text-align: right;
+    }
+    
+    .invoice-table td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      color: #333;
+    }
+    
+    .totals-section {
+      margin-left: auto;
+      width: 400px;
+    }
+    
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    
+    .total-row.subtotal {
+      background: #f9fafb;
+    }
+    
+    .total-row.grand-total {
+      background: #667eea;
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+    
+    .footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 2px solid #e5e7eb;
+      text-align: center;
+    }
+    
+    .footer p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    
+    .message {
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    @media print {
+      .navbar, .action-bar, .message {
+        display: none !important;
+      }
+      
+      .invoice-container {
+        box-shadow: none;
+        padding: 20px;
+      }
+      
+      body {
+        background: white;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <h1>🔐 RentComPro</h1>
+  </nav>
+
+  <div class="container">
+    <div id="message" class="message"></div>
+    
+    <div class="action-bar">
+      <button class="btn btn-secondary" onclick="window.history.back()">← Back to Edit</button>
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
+      <button class="btn btn-success" onclick="generatePDF()">📄 Generate PDF & Save</button>
+    </div>
+
+    <div class="invoice-container" id="invoicePreview">
+      <div class="invoice-header">
+        <div class="company-info">
+          <h1>YCPL</h1>
+          <p>D.R. White House Building, Ground Floor<br>
+          Sector 27, Atta Market<br>
+          Noida, U.P. - 201301<br>
+          (Near Vinayak Hospital)</p>
+        </div>
+        <div class="invoice-title">
+          <h2>INVOICE</h2>
+          <p id="invoiceNumber"></p>
+          <p id="referenceNumber"></p>
+        </div>
+      </div>
+
+      <div class="invoice-meta">
+        <div class="bill-to">
+          <h3>Bill To</h3>
+          <p id="clientName"></p>
+          <p id="clientOwner"></p>
+          <p id="clientPhone"></p>
+          <p id="clientAddress"></p>
+        </div>
+        
+        <div class="invoice-details">
+          <h3>Invoice Details</h3>
+          <p><strong>Invoice Date:</strong> <span id="invoiceDate"></span></p>
+          <p><strong>Period:</strong> <span id="period"></span></p>
+          <p><strong>Due Date:</strong> <span id="dueDate"></span></p>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th style="text-align: center;">Quantity</th>
+            <th style="text-align: right;">Rate</th>
+            <th style="text-align: right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceItems">
+        </tbody>
+      </table>
+
+      <div class="totals-section">
+        <div class="total-row subtotal">
+          <span>Subtotal:</span>
+          <span id="totalSubtotal">₹0</span>
+        </div>
+        <div class="total-row" id="outstandingRow" style="display: none;">
+          <span>Previous Outstanding:</span>
+          <span id="totalOutstanding">₹0</span>
+        </div>
+        <div class="total-row" id="gstRow" style="display: none;">
+          <span>GST @ 18%:</span>
+          <span id="totalGst">₹0</span>
+        </div>
+        <div class="total-row grand-total">
+          <span>TOTAL PAYABLE:</span>
+          <span id="grandTotal">₹0</span>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p><strong>Payment Due: <span id="footerDueDate"></span></strong></p>
+        <p style="margin-top: 20px;">Thank you for your business!</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_URL = isLocal ? 'http://localhost:8787' : 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
+
+    let invoiceData = null;
+    let clientData = null;
+
+    // Load invoice data
+    async function init() {
+      const dataStr = localStorage.getItem('invoicePreview');
+      if (!dataStr) {
+        alert('No invoice data found');
+        window.history.back();
+        return;
+      }
+
+      invoiceData = JSON.parse(dataStr);
+      
+      // Load client data
+      await loadClientData();
+      
+      // Display invoice
+      displayInvoice();
+    }
+
+    // Load client data
+    async function loadClientData() {
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch(`${API_URL}/api/clients/${invoiceData.clientId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          clientData = data.data;
+        }
+      } catch (error) {
+        console.error('Load client error:', error);
+      }
+    }
+
+    // Display invoice
+    function displayInvoice() {
+      // Header
+      document.getElementById('invoiceNumber').textContent = invoiceData.invoiceNumber;
+      if (invoiceData.referenceNumber) {
+        document.getElementById('referenceNumber').textContent = `Ref: ${invoiceData.referenceNumber}`;
+      }
+
+      // Bill to
+      if (clientData) {
+        document.getElementById('clientName').textContent = clientData.company_name;
+        document.getElementById('clientOwner').textContent = clientData.owner_name;
+        document.getElementById('clientPhone').textContent = clientData.phone;
+        document.getElementById('clientAddress').textContent = 
+          `${clientData.city}, ${clientData.state} - ${clientData.pincode}`;
+      }
+
+      // Invoice details
+      document.getElementById('invoiceDate').textContent = formatDate(invoiceData.invoiceDate);
+      document.getElementById('period').textContent = 
+        `${formatDate(invoiceData.periodFrom)} to ${formatDate(invoiceData.periodTo)}`;
+      document.getElementById('dueDate').textContent = formatDate(invoiceData.dueDate);
+      document.getElementById('footerDueDate').textContent = formatDate(invoiceData.dueDate);
+
+      // Items
+      let itemsHtml = '';
+      let subtotal = 0;
+
+      invoiceData.items.forEach(item => {
+        itemsHtml += `
+          <tr>
+            <td>${item.description}</td>
+            <td style="text-align: center;">${item.quantity}</td>
+            <td style="text-align: right;">₹${item.rate.toFixed(2)}</td>
+            <td style="text-align: right;">₹${item.amount.toFixed(2)}</td>
+          </tr>
+        `;
+        subtotal += item.amount;
+      });
+
+      document.getElementById('invoiceItems').innerHTML = itemsHtml;
+
+      // Totals
+      document.getElementById('totalSubtotal').textContent = `₹${subtotal.toFixed(2)}`;
+
+      if (invoiceData.previousOutstanding > 0) {
+        document.getElementById('outstandingRow').style.display = 'flex';
+        document.getElementById('totalOutstanding').textContent = 
+          `₹${invoiceData.previousOutstanding.toFixed(2)}`;
+      }
+
+      let taxableAmount = subtotal + invoiceData.previousOutstanding;
+      let gstAmount = 0;
+      
+      if (invoiceData.hasGst) {
+        gstAmount = taxableAmount * 0.18;
+        document.getElementById('gstRow').style.display = 'flex';
+        document.getElementById('totalGst').textContent = `₹${gstAmount.toFixed(2)}`;
+      }
+
+      const grandTotal = taxableAmount + gstAmount;
+      document.getElementById('grandTotal').textContent = `₹${grandTotal.toFixed(2)}`;
+    }
+
+    // Format date
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-IN', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
+      });
+    }
+
+    // Generate PDF and save to database
+    async function generatePDF() {
+      const token = localStorage.getItem('token');
+      const messageEl = document.getElementById('message');
+
+      try {
+        messageEl.textContent = 'Generating invoice...';
+        messageEl.className = 'message';
+        messageEl.style.display = 'block';
+
+        // Save to database
+        const response = await fetch(`${API_URL}/api/invoices`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(invoiceData),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          messageEl.textContent = '✅ Invoice generated successfully!';
+          messageEl.className = 'message success';
+          
+          // Print PDF
+          setTimeout(() => {
+            window.print();
+            
+            // Clear preview data
+            localStorage.removeItem('invoicePreview');
+            
+            // Redirect to invoices list
+            setTimeout(() => {
+              window.location.href = '/invoices.html';
+            }, 2000);
+          }, 1000);
+        } else {
+          messageEl.textContent = `❌ ${data.message}`;
+          messageEl.className = 'message error';
+        }
+      } catch (error) {
+        console.error('Generate invoice error:', error);
+        messageEl.textContent = '❌ Failed to generate invoice';
+        messageEl.className = 'message error';
+      }
+    }
+
+    // Initialize
+    init();
+  </script>
+</body>
+</html>
