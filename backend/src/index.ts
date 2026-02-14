@@ -11,6 +11,7 @@ import { addDevice, getDevices } from './devices/management';
 import { registerClient, getClients, getClient, updateClient } from './clients/management';
 import { addRentalItem, getClientRentalItems, getRentalItemHistory, removeRentalItem } from './rental-items/management';
 import { getLastInvoice, createInvoice, getInvoices, getInvoice, markInvoicePaid, getClientLastInvoice } from './invoices/management';
+import { getItems, getActiveItems, getItem, createItem, updateItem, toggleItemActive, deleteItem } from './items/management';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -98,6 +99,15 @@ app.get('/api/invoices', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), ge
 app.get('/api/invoices/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getInvoice);
 app.post('/api/invoices/:id/pay', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), markInvoicePaid);
 app.get('/api/invoices/client/:clientId/last', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getClientLastInvoice);
+
+// Item Master Management (Protected - Admin only)
+app.get('/api/items', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getItems);
+app.get('/api/items/active', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getActiveItems);
+app.get('/api/items/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getItem);
+app.post('/api/items', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), createItem);
+app.put('/api/items/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), updateItem);
+app.put('/api/items/:id/toggle', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), toggleItemActive);
+app.delete('/api/items/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), deleteItem);
 
 // Logout endpoint
 app.post('/api/auth/logout', logoutHandler);

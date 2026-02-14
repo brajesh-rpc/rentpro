@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item Master - RentComPro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+    }
+    
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px 30px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .navbar h1 {
+      font-size: 24px;
+    }
+    
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      margin-left: 10px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .filters {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+    }
+    
+    .filter-btn {
+      padding: 10px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .filter-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .item-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-left: 4px solid #667eea;
+    }
+    
+    .item-card.inactive {
+      opacity: 0.6;
+      border-left-color: #999;
+    }
+    
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 15px;
+    }
+    
+    .item-code {
+      font-size: 12px;
+      color: #666;
+      background: #f3f4f6;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    
+    .item-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    
+    .item-rate {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+      margin: 10px 0;
+    }
+    
+    .item-type {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .item-type.rental {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .item-type.sale {
+      background: #cce5ff;
+      color: #004085;
+    }
+    
+    .item-actions {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <h1>🔐 RentComPro - Item Master</h1>
+    <div class="nav-links">
+      <a href="/Frontend/dashboard.html">Dashboard</a>
+      <a href="/Frontend/manage-clients.html">Clients</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="header">
+      <h2>📦 Item Master</h2>
+      <button class="btn btn-primary" onclick="alert('Add Item - Coming Soon')">➕ Add New Item</button>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterItems('all')">All Items</button>
+      <button class="filter-btn" onclick="filterItems('COMPUTER')">Computers</button>
+      <button class="filter-btn" onclick="filterItems('PERIPHERAL')">Peripherals</button>
+      <button class="filter-btn" onclick="filterItems('ACCESSORY')">Accessories</button>
+      <button class="filter-btn" onclick="filterItems('RENTAL')">Rental Only</button>
+      <button class="filter-btn" onclick="filterItems('SALE')">Sale Only</button>
+    </div>
+
+    <div id="itemsGrid" class="items-grid">
+      <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #999;">
+        Loading items...
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_URL = isLocal ? 'http://localhost:8787' : 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
+
+    let allItems = [];
+
+    // Load items
+    async function loadItems() {
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch(`${API_URL}/api/items`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          allItems = data.data;
+          displayItems(allItems);
+        }
+      } catch (error) {
+        console.error('Load items error:', error);
+        document.getElementById('itemsGrid').innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; color: #dc3545;">
+            Failed to load items
+          </div>
+        `;
+      }
+    }
+
+    // Display items
+    function displayItems(items) {
+      const grid = document.getElementById('itemsGrid');
+      
+      if (items.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; color: #999; padding: 60px;">
+            No items found
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = items.map(item => `
+        <div class="item-card ${item.is_active ? '' : 'inactive'}">
+          <div class="item-header">
+            <span class="item-code">${item.item_code}</span>
+            <span class="item-type ${item.item_type.toLowerCase()}">${item.item_type}</span>
+          </div>
+          <div class="item-name">${item.item_name}</div>
+          <div class="item-rate">₹${item.default_rate}</div>
+          <div style="font-size: 12px; color: #666;">${item.category}</div>
+          <div class="item-actions">
+            <button class="btn btn-secondary btn-sm" onclick="editItem('${item.id}')">
+              ✏️ Edit
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="toggleActive('${item.id}', ${item.is_active})">
+              ${item.is_active ? '🚫 Disable' : '✅ Enable'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Filter items
+    function filterItems(type) {
+      // Update button states
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      let filtered = allItems;
+      
+      if (type === 'RENTAL' || type === 'SALE') {
+        filtered = allItems.filter(item => item.item_type === type);
+      } else if (type !== 'all') {
+        filtered = allItems.filter(item => item.category === type);
+      }
+      
+      displayItems(filtered);
+    }
+
+    // Edit item
+    function editItem(id) {
+      alert('Edit Item - Coming Soon');
+    }
+
+    // Toggle active status
+    async function toggleActive(id, currentStatus) {
+      const newStatus = !currentStatus;
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch(`${API_URL}/api/items/${id}/toggle`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ is_active: newStatus }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert(`Item ${newStatus ? 'enabled' : 'disabled'} successfully!`);
+          loadItems();
+        }
+      } catch (error) {
+        console.error('Toggle error:', error);
+        alert('Failed to update item');
+      }
+    }
+
+    // Load items on page load
+    loadItems();
+  </script>
+</body>
+</html>
