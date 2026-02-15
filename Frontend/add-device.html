@@ -174,6 +174,29 @@
       color: #999;
       margin-top: 5px;
     }
+    
+    .name-suggestions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .suggestion-chip {
+      padding: 6px 12px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 15px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .suggestion-chip:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
   </style>
 </head>
 <body>
@@ -181,7 +204,7 @@
     <h1>🔐 RentComPro</h1>
     <div class="nav-links">
       <a href="/dashboard.html">Dashboard</a>
-      <a href="/add-device.html">Add Device</a>
+      <a href="/manage-devices.html">Devices</a>
       <a href="/register-client.html">Register Client</a>
     </div>
   </nav>
@@ -195,20 +218,16 @@
 
       <form id="deviceForm">
         <div class="form-grid">
-          <div class="form-group">
+          <div class="form-group full-width">
             <label>Device Name <span class="required">*</span></label>
-            <input type="text" id="deviceName" placeholder="e.g., Rajesh-i5" required>
-            <div class="help-text">Human-friendly name for easy identification</div>
-          </div>
-
-          <div class="form-group">
-            <label>Serial Number <span class="required">*</span></label>
-            <input type="text" id="serialNumber" placeholder="e.g., DEV001" required>
+            <input type="text" id="deviceName" placeholder="e.g., Sonu-Desktop, Rahul-Laptop" required>
+            <div class="help-text">Human-friendly name for easy identification (must be unique)</div>
+            <div id="nameSuggestions" class="name-suggestions"></div>
           </div>
 
           <div class="form-group">
             <label>Device Type <span class="required">*</span></label>
-            <select id="deviceType" required>
+            <select id="deviceType" required onchange="updateNameSuggestions()">
               <option value="">Select Type</option>
               <option value="DESKTOP">Desktop</option>
               <option value="LAPTOP">Laptop</option>
@@ -216,8 +235,14 @@
           </div>
 
           <div class="form-group">
+            <label>Serial Number <span class="required">*</span></label>
+            <input type="text" id="serialNumber" placeholder="e.g., DEV001 or ABC123XYZ" required>
+            <div class="help-text">Physical serial or custom ID</div>
+          </div>
+
+          <div class="form-group">
             <label>Brand</label>
-            <input type="text" id="brand" placeholder="e.g., Dell, HP">
+            <input type="text" id="brand" placeholder="e.g., Dell, HP, Assembled">
           </div>
 
           <div class="form-group">
@@ -309,6 +334,38 @@
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const API_URL = isLocal ? 'http://localhost:8787' : 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
 
+    // Popular Indian names for suggestions
+    const nameSuggestions = {
+      male: ['Sonu', 'Monu', 'Rahul', 'Amit', 'Raj', 'Suresh', 'Ramesh', 'Vijay', 'Ajay', 'Ravi'],
+      female: ['Priya', 'Neha', 'Ritu', 'Sonia', 'Kavita', 'Anjali', 'Pooja', 'Deepa', 'Meena', 'Rekha'],
+      neutral: ['Manager', 'Reception', 'Accounts', 'Sales', 'Support']
+    };
+
+    function updateNameSuggestions() {
+      const deviceType = document.getElementById('deviceType').value;
+      const suggestionsDiv = document.getElementById('nameSuggestions');
+      
+      if (!deviceType) {
+        suggestionsDiv.innerHTML = '';
+        return;
+      }
+
+      const suffix = deviceType === 'DESKTOP' ? '-Desktop' : '-Laptop';
+      const allNames = [...nameSuggestions.male.slice(0, 5), ...nameSuggestions.female.slice(0, 3)];
+      
+      suggestionsDiv.innerHTML = '<div class="help-text" style="margin-bottom: 5px;">Quick suggestions:</div>';
+      
+      allNames.forEach(name => {
+        const chip = document.createElement('span');
+        chip.className = 'suggestion-chip';
+        chip.textContent = name + suffix;
+        chip.onclick = () => {
+          document.getElementById('deviceName').value = name + suffix;
+        };
+        suggestionsDiv.appendChild(chip);
+      });
+    }
+
     document.getElementById('deviceForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -321,8 +378,8 @@
       }
 
       const deviceData = {
-        deviceName: document.getElementById('deviceName').value,
-        serialNumber: document.getElementById('serialNumber').value,
+        deviceName: document.getElementById('deviceName').value.trim(),
+        serialNumber: document.getElementById('serialNumber').value.trim(),
         deviceType: document.getElementById('deviceType').value,
         brand: document.getElementById('brand').value || 'Generic',
         model: document.getElementById('model').value || 'Unknown',
@@ -360,7 +417,7 @@
           messageEl.className = 'message success';
           
           setTimeout(() => {
-            window.location.href = '/dashboard.html';
+            window.location.href = '/manage-devices.html';
           }, 2000);
         } else {
           messageEl.textContent = `❌ ${data.message}`;
