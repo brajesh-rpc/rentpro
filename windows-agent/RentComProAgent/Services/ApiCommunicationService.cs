@@ -42,7 +42,14 @@ namespace RentComProAgent.Services
                     diskUsed = stats.DiskUsed,
                     isOnline = stats.IsOnline,
                     currentUser = stats.CurrentUser,
-                    timestamp = stats.Timestamp
+                    timestamp = stats.Timestamp,
+                    
+                    // NEW: Network information
+                    lanMacAddress = stats.LanMacAddress,
+                    activeMacAddress = stats.ActiveMacAddress,
+                    connectionType = stats.ConnectionType,
+                    ipAddress = stats.IpAddress,
+                    computerName = stats.ComputerName
                 };
 
                 var json = JsonSerializer.Serialize(payload);
@@ -80,66 +87,5 @@ namespace RentComProAgent.Services
                 return null;
             }
         }
-
-        public async Task<bool> RegisterDeviceAsync(string deviceName, string deviceInfo)
-        {
-            try
-            {
-                var payload = new
-                {
-                    deviceName,
-                    deviceInfo,
-                    timestamp = DateTime.UtcNow
-                };
-
-                var json = JsonSerializer.Serialize(payload);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var response = await _httpClient.PostAsync("/api/devices/register", content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseBody = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<RegistrationResponse>(responseBody, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-
-                    if (result?.Success == true && result.Data != null)
-                    {
-                        // Save device ID and token to config
-                        _logger.LogInformation("Device registered successfully. ID: {deviceId}", result.Data.DeviceId);
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error registering device");
-                return false;
-            }
-        }
-    }
-
-    public class ServerResponse
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public bool LockStatus { get; set; }
-    }
-
-    public class RegistrationResponse
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public RegistrationData? Data { get; set; }
-    }
-
-    public class RegistrationData
-    {
-        public string DeviceId { get; set; } = string.Empty;
-        public string DeviceToken { get; set; } = string.Empty;
     }
 }

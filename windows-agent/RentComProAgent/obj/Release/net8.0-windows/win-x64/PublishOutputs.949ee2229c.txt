@@ -1,0 +1,3 @@
+C:\Users\HP\Desktop\RentComPro\windows-agent\publish\appsettings.json
+C:\Users\HP\Desktop\RentComPro\windows-agent\publish\RentComProAgent.pdb
+C:\Users\HP\Desktop\RentComPro\windows-agent\publish\RentComProAgent.exe

@@ -2,7 +2,7 @@ import { Context } from 'hono';
 import type { Env } from '../types';
 import { getSupabaseClient } from '../utils/supabase';
 
-// Device stats endpoint - receives hardware stats from agent
+// Receive hardware stats from agent
 export async function receiveDeviceStats(c: Context<{ Bindings: Env }>): Promise<Response> {
   try {
     const body = await c.req.json();
@@ -19,33 +19,71 @@ export async function receiveDeviceStats(c: Context<{ Bindings: Env }>): Promise
       diskUsed,
       isOnline,
       currentUser,
-      timestamp
+      timestamp,
+      // NEW: Network information
+      lanMacAddress,
+      activeMacAddress,
+      connectionType,
+      ipAddress,
+      computerName
     } = body;
 
-    // Basic validation
-    if (!deviceId || !deviceToken) {
+    console.log('Received stats from device:', deviceId);
+    console.log('MAC addresses - LAN:', lanMacAddress, 'Active:', activeMacAddress);
+
+    // Validation
+    if (!deviceId) {
       return c.json({
         success: false,
-        message: 'Device ID and Token required',
-        lockStatus: false
+        message: 'Missing deviceId'
       }, 400);
     }
 
     const supabase = getSupabaseClient(c.env);
 
-    // Verify device exists and token is valid
-    const { data: device, error: deviceError } = await supabase
+    // Find device by device_name or serial_number
+    const { data: device, error: findError } = await supabase
       .from('devices')
-      .select('id, serial_number, status')
-      .eq('serial_number', deviceId)
+      .select('id, status')
+      .or(`device_name.eq.${deviceId},serial_number.eq.${deviceId}`)
       .single();
 
-    if (deviceError || !device) {
+    if (findError || !device) {
+      console.log('Device not found:', deviceId);
       return c.json({
         success: false,
-        message: 'Invalid device ID or token',
+        message: 'Device not found',
         lockStatus: false
-      }, 401);
+      }, 404);
+    }
+
+    // Update device with latest stats and MAC addresses
+    const updateData: any = {
+      is_online: true,
+      last_seen: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    // Update MAC addresses if provided
+    if (lanMacAddress) {
+      updateData.lan_mac_address = lanMacAddress;
+    }
+    if (activeMacAddress) {
+      updateData.active_mac_address = activeMacAddress;
+    }
+    if (connectionType) {
+      updateData.active_connection_type = connectionType;
+    }
+
+    const { error: updateError } = await supabase
+      .from('devices')
+      .update(updateData)
+      .eq('id', device.id);
+
+    if (updateError) {
+      console.error('Error updating device:', updateError);
+    } else {
+      console.log('Device updated with MAC addresses:', lanMacAddress);
     }
 
     // Insert hardware stats
@@ -54,110 +92,37 @@ export async function receiveDeviceStats(c: Context<{ Bindings: Env }>): Promise
       .insert({
         device_id: device.id,
         cpu_usage: cpuUsage,
-        ram_total: Math.round(ramTotal / (1024 * 1024 * 1024)), // Convert to GB
-        ram_used: Math.round(ramUsed / (1024 * 1024 * 1024)),
-        disk_total: Math.round(diskTotal / (1024 * 1024 * 1024)),
-        disk_used: Math.round(diskUsed / (1024 * 1024 * 1024)),
-        ip_address: c.req.header('cf-connecting-ip') || 'unknown',
-        login_count: 1,
-        timestamp: new Date(timestamp || Date.now()).toISOString()
+        ram_usage: ramUsage,
+        ram_total_gb: ramTotal,
+        ram_used_gb: ramUsed,
+        disk_usage: diskUsage,
+        disk_total_gb: diskTotal,
+        disk_used_gb: diskUsed,
+        is_online: isOnline,
+        current_user: currentUser,
+        recorded_at: timestamp || new Date().toISOString()
       });
 
     if (statsError) {
       console.error('Error inserting stats:', statsError);
     }
 
-    // Update device last_seen
-    await supabase
-      .from('devices')
-      .update({ 
-        last_seen: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', device.id);
-
-    // Determine if device should be locked
-    // For now, we'll just return false (no lock)
-    // TODO: Check payment status and return true if payment overdue
-    const shouldLock = false; // device.status === 'LOCKED' or payment overdue
+    // Check if device should be locked
+    const shouldLock = device.status === 'LOCKED' || device.status === 'STOLEN';
 
     return c.json({
       success: true,
-      message: 'Stats received successfully',
-      lockStatus: shouldLock
+      message: 'Stats received',
+      lockStatus: shouldLock,
+      deviceStatus: device.status
     });
 
   } catch (error) {
-    console.error('Device stats error:', error);
+    console.error('Receive stats error:', error);
     return c.json({
       success: false,
       message: 'Internal server error',
       lockStatus: false
-    }, 500);
-  }
-}
-
-// Device registration endpoint
-export async function registerDevice(c: Context<{ Bindings: Env }>): Promise<Response> {
-  try {
-    // This would require authentication - for now, simple implementation
-    const body = await c.req.json();
-    const { deviceName, deviceInfo } = body;
-
-    if (!deviceName) {
-      return c.json({
-        success: false,
-        message: 'Device name required'
-      }, 400);
-    }
-
-    const supabase = getSupabaseClient(c.env);
-
-    // Generate a unique device ID (serial number)
-    const deviceId = `DEV${Date.now().toString(36).toUpperCase()}`;
-    const deviceToken = crypto.randomUUID();
-
-    // Parse device info
-    const info = JSON.parse(deviceInfo);
-
-    // Insert device into database
-    const { data, error } = await supabase
-      .from('devices')
-      .insert({
-        serial_number: deviceId,
-        device_type: 'DESKTOP',
-        brand: 'Generic',
-        model: info.computerName || 'Unknown',
-        processor: info.cpu || 'Unknown',
-        ram_gb: info.ramGB || 4,
-        storage_gb: info.diskGB || 500,
-        status: 'AVAILABLE'
-      })
-      .select()
-      .single();
-
-    if (error) {
-      return c.json({
-        success: false,
-        message: 'Failed to register device',
-        error: error.message
-      }, 500);
-    }
-
-    return c.json({
-      success: true,
-      message: 'Device registered successfully',
-      data: {
-        deviceId: deviceId,
-        deviceToken: deviceToken
-      }
-    });
-
-  } catch (error) {
-    console.error('Device registration error:', error);
-    return c.json({
-      success: false,
-      message: 'Internal server error'
     }, 500);
   }
 }

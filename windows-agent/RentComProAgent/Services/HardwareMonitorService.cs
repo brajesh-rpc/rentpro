@@ -24,6 +24,9 @@ namespace RentComProAgent.Services
         {
             try
             {
+                // Collect network info
+                var networkInfo = NetworkDetectionService.DetectNetwork();
+                
                 var stats = new HardwareStats
                 {
                     CpuUsage = GetCpuUsage(),
@@ -35,8 +38,18 @@ namespace RentComProAgent.Services
                     DiskUsed = GetUsedDisk(),
                     IsOnline = CheckInternetConnection(),
                     CurrentUser = GetCurrentUser(),
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.UtcNow,
+                    
+                    // NEW: Network information
+                    LanMacAddress = networkInfo.LanMacAddress,
+                    ActiveMacAddress = networkInfo.ActiveMacAddress,
+                    ConnectionType = networkInfo.ConnectionType,
+                    IpAddress = networkInfo.IpAddress,
+                    ComputerName = Environment.MachineName
                 };
+
+                _logger.LogInformation("Network detected - LAN MAC: {lanMac}, Active MAC: {activeMac}, Type: {type}", 
+                    stats.LanMacAddress, stats.ActiveMacAddress, stats.ConnectionType);
 
                 return stats;
             }

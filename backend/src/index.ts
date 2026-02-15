@@ -6,7 +6,7 @@ import { loginHandler } from './auth/login';
 import { logoutHandler } from './auth/logout';
 import { authMiddleware, requireRole } from './middleware/auth';
 import { getDashboardStats, getRecentActivity } from './dashboard/stats';
-import { receiveDeviceStats, registerDevice } from './devices/stats';
+import { receiveDeviceStats } from './devices/stats';
 import { addDevice, getDevices } from './devices/management';
 import { registerClient, getClients, getClient, updateClient } from './clients/management';
 import { addRentalItem, getClientRentalItems, getRentalItemHistory, removeRentalItem } from './rental-items/management';
@@ -72,9 +72,8 @@ app.get('/api/test-connection', async (c) => {
 // Login endpoint
 app.post('/api/auth/login', loginHandler);
 
-// Device endpoints (Public - no auth required for agents)
+// Device Stats endpoint (Public - no auth required for agents)
 app.post('/api/devices/stats', receiveDeviceStats);
-app.post('/api/devices/register', registerDevice);
 
 // Device Management (Protected - Admin only)
 app.post('/api/devices', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), addDevice);
