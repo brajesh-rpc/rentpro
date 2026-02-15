@@ -276,8 +276,8 @@
   <nav class="navbar">
     <h1>🔐 RentComPro - Item Master</h1>
     <div class="nav-links">
-      <a href="/Frontend/dashboard.html">Dashboard</a>
-      <a href="/Frontend/manage-clients.html">Clients</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/manage-clients.html">Clients</a>
     </div>
   </nav>
 
@@ -579,7 +579,8 @@
     function checkAuth() {
       const token = localStorage.getItem('token');
       if (!token) {
-        window.location.href = '/Frontend/index.html';
+        alert('Session expired. Please login again.');
+        window.location.href = '/index.html';
         return false;
       }
       return true;

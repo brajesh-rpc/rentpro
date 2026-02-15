@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item Master Debug - RentComPro</title>
+</head>
+<body>
+  <h1>Item Master Debug</h1>
+  <div id="debug"></div>
+
+  <script>
+    const debugDiv = document.getElementById('debug');
+    
+    function log(msg) {
+      console.log(msg);
+      debugDiv.innerHTML += `<p>${msg}</p>`;
+    }
+    
+    log('1. Page loaded');
+    
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    
+    log(`2. Token exists: ${token ? 'YES' : 'NO'}`);
+    log(`3. User exists: ${user ? 'YES' : 'NO'}`);
+    
+    if (token) {
+      log(`4. Token value: ${token.substring(0, 20)}...`);
+      
+      const API_URL = 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
+      
+      log(`5. Calling API: ${API_URL}/api/items`);
+      
+      fetch(`${API_URL}/api/items`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(r => {
+        log(`6. Response status: ${r.status}`);
+        return r.json();
+      })
+      .then(data => {
+        log(`7. Response data: ${JSON.stringify(data).substring(0, 100)}...`);
+        if (data.success) {
+          log(`8. SUCCESS! Items count: ${data.data.length}`);
+          debugDiv.innerHTML += '<h2>Items:</h2>';
+          data.data.forEach(item => {
+            debugDiv.innerHTML += `<p>- ${item.item_name} @ ₹${item.default_rate}</p>`;
+          });
+        } else {
+          log(`8. FAILED: ${data.message}`);
+        }
+      })
+      .catch(err => {
+        log(`ERROR: ${err.message}`);
+      });
+    } else {
+      log('4. NO TOKEN - Would redirect to login');
+    }
+  </script>
+</body>
+</html>
