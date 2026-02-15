@@ -10,6 +10,9 @@ export async function addDevice(c: Context<{ Bindings: Env }>): Promise<Response
     const {
       deviceName,
       serialNumber,
+      lanMacAddress,        // NEW: LAN MAC (permanent ID)
+      activeMacAddress,     // NEW: Active connection MAC  
+      activeConnectionType, // NEW: LAN/WIFI/DONGLE
       deviceType,
       brand,
       model,
@@ -26,8 +29,8 @@ export async function addDevice(c: Context<{ Bindings: Env }>): Promise<Response
       status
     } = body;
 
-    // Validation
-    if (!deviceName || !serialNumber || !deviceType || !processor || !ramGb || !storageGb || !monthlyRent) {
+    // Validation - deviceName and MAC can be optional for manual entry
+    if (!serialNumber || !deviceType || !processor || !ramGb || !storageGb || !monthlyRent) {
       return c.json({
         success: false,
         message: 'Missing required fields'
@@ -50,11 +53,15 @@ export async function addDevice(c: Context<{ Bindings: Env }>): Promise<Response
       }, 400);
     }
 
-    // Insert device
+    // Insert device with new MAC fields
     const { data, error } = await supabase
       .from('devices')
       .insert({
+        device_name: deviceName,                    // NEW
         serial_number: serialNumber,
+        lan_mac_address: lanMacAddress,             // NEW
+        active_mac_address: activeMacAddress,       // NEW
+        active_connection_type: activeConnectionType, // NEW
         device_type: deviceType,
         brand: brand || 'Generic',
         model: model || 'Unknown',
