@@ -66,6 +66,21 @@
       color: white;
     }
     
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
     .filters {
       background: white;
       padding: 20px;
@@ -168,14 +183,92 @@
       font-size: 12px;
     }
     
-    .btn-secondary {
-      background: #6c757d;
-      color: white;
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
     }
     
-    .btn-danger {
-      background: #dc3545;
-      color: white;
+    .modal.show {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-header h3 {
+      font-size: 20px;
+      color: #333;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -191,7 +284,7 @@
   <div class="container">
     <div class="header">
       <h2>📦 Item Master</h2>
-      <button class="btn btn-primary" onclick="alert('Add Item - Coming Soon')">➕ Add New Item</button>
+      <button class="btn btn-primary" onclick="openAddModal()">➕ Add New Item</button>
     </div>
 
     <div class="filters">
@@ -210,11 +303,78 @@
     </div>
   </div>
 
+  <!-- Add/Edit Item Modal -->
+  <div id="itemModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add New Item</h3>
+        <button class="close-btn" onclick="closeModal()">×</button>
+      </div>
+      
+      <form id="itemForm" onsubmit="saveItem(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Item Code *</label>
+            <input type="text" id="itemCode" required placeholder="e.g., DT-I5-8GB">
+          </div>
+          
+          <div class="form-group">
+            <label>Item Type *</label>
+            <select id="itemType" required>
+              <option value="">Select Type</option>
+              <option value="RENTAL">Rental</option>
+              <option value="SALE">Sale</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Item Name *</label>
+          <input type="text" id="itemName" required placeholder="e.g., Desktop i5 8GB 1TB">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="category" required>
+              <option value="">Select Category</option>
+              <option value="COMPUTER">Computer</option>
+              <option value="PERIPHERAL">Peripheral</option>
+              <option value="ACCESSORY">Accessory</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Default Rate (₹) *</label>
+            <input type="number" id="defaultRate" required step="0.01" placeholder="1200.00">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="description" rows="3" placeholder="Item description..."></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>HSN/SAC Code</label>
+          <input type="text" id="hsnSacCode" placeholder="e.g., 997212">
+        </div>
+        
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-success" id="saveBtn">💾 Save Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const API_URL = isLocal ? 'http://localhost:8787' : 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
 
     let allItems = [];
+    let editingItemId = null;
 
     // Load items
     async function loadItems() {
@@ -261,7 +421,8 @@
           </div>
           <div class="item-name">${item.item_name}</div>
           <div class="item-rate">₹${item.default_rate}</div>
-          <div style="font-size: 12px; color: #666;">${item.category}</div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 10px;">${item.category}</div>
+          <div style="font-size: 13px; color: #666;">${item.description || 'No description'}</div>
           <div class="item-actions">
             <button class="btn btn-secondary btn-sm" onclick="editItem('${item.id}')">
               ✏️ Edit
@@ -276,10 +437,7 @@
 
     // Filter items
     function filterItems(type) {
-      // Update button states
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
       event.target.classList.add('active');
       
       let filtered = allItems;
@@ -293,13 +451,106 @@
       displayItems(filtered);
     }
 
+    // Open add modal
+    function openAddModal() {
+      editingItemId = null;
+      document.getElementById('modalTitle').textContent = 'Add New Item';
+      document.getElementById('itemForm').reset();
+      document.getElementById('itemCode').disabled = false;
+      document.getElementById('itemModal').classList.add('show');
+    }
+
     // Edit item
-    function editItem(id) {
-      alert('Edit Item - Coming Soon');
+    async function editItem(id) {
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch(`${API_URL}/api/items/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          const item = data.data;
+          editingItemId = id;
+          
+          document.getElementById('modalTitle').textContent = 'Edit Item';
+          document.getElementById('itemCode').value = item.item_code;
+          document.getElementById('itemCode').disabled = true; // Can't change code
+          document.getElementById('itemName').value = item.item_name;
+          document.getElementById('category').value = item.category;
+          document.getElementById('itemType').value = item.item_type;
+          document.getElementById('defaultRate').value = item.default_rate;
+          document.getElementById('description').value = item.description || '';
+          document.getElementById('hsnSacCode').value = item.hsn_sac_code || '';
+          
+          document.getElementById('itemModal').classList.add('show');
+        }
+      } catch (error) {
+        console.error('Load item error:', error);
+        alert('Failed to load item details');
+      }
+    }
+
+    // Save item
+    async function saveItem(e) {
+      e.preventDefault();
+      
+      const token = localStorage.getItem('token');
+      const formData = {
+        itemCode: document.getElementById('itemCode').value,
+        itemName: document.getElementById('itemName').value,
+        category: document.getElementById('category').value,
+        itemType: document.getElementById('itemType').value,
+        defaultRate: parseFloat(document.getElementById('defaultRate').value),
+        description: document.getElementById('description').value,
+        hsnSacCode: document.getElementById('hsnSacCode').value
+      };
+      
+      try {
+        const url = editingItemId 
+          ? `${API_URL}/api/items/${editingItemId}`
+          : `${API_URL}/api/items`;
+        
+        const method = editingItemId ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert(`Item ${editingItemId ? 'updated' : 'created'} successfully!`);
+          closeModal();
+          loadItems();
+        } else {
+          alert(`Error: ${data.message}`);
+        }
+      } catch (error) {
+        console.error('Save item error:', error);
+        alert('Failed to save item');
+      }
+    }
+
+    // Close modal
+    function closeModal() {
+      document.getElementById('itemModal').classList.remove('show');
+      document.getElementById('itemForm').reset();
+      editingItemId = null;
     }
 
     // Toggle active status
     async function toggleActive(id, currentStatus) {
+      if (!confirm(`Are you sure you want to ${currentStatus ? 'disable' : 'enable'} this item?`)) {
+        return;
+      }
+      
       const newStatus = !currentStatus;
       const token = localStorage.getItem('token');
       
@@ -316,7 +567,6 @@
         const data = await response.json();
         
         if (data.success) {
-          alert(`Item ${newStatus ? 'enabled' : 'disabled'} successfully!`);
           loadItems();
         }
       } catch (error) {
