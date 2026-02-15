@@ -575,8 +575,20 @@
       }
     }
 
-    // Load items on page load
-    loadItems();
+    // Check authentication
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/Frontend/index.html';
+        return false;
+      }
+      return true;
+    }
+
+    // Initialize
+    if (checkAuth()) {
+      loadItems();
+    }
   </script>
 </body>
 </html>
