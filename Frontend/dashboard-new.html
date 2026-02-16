@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - RentComPro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      /* Colors */
+      --primary-blue: #4A90E2;
+      --success-green: #4CAF50;
+      --warning-orange: #FF9800;
+      --danger-red: #F44336;
+      --bg-gray: #F5F7FA;
+      --sidebar-bg: #3B4D61;
+      --sidebar-active: #4A90E2;
+      --sidebar-hover: #475766;
+      --text-dark: #2C3E50;
+      --text-light: #7F8C9A;
+      --border-color: #E1E8ED;
+      --icon-color: #95A5A6;
+      
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 20px;
+      --space-xl: 24px;
+      
+      /* Shadows */
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
+      
+      /* Dimensions */
+      --sidebar-width: 220px;
+      --sidebar-collapsed: 60px;
+      --topbar-height: 60px;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+      background: var(--bg-gray);
+      overflow-x: hidden;
+      color: var(--text-dark);
+    }
+    
+    /* TOP BAR */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--topbar-height);
+      background: white;
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-lg);
+      z-index: 100;
+    }
+    
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    
+    .hamburger {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      padding: var(--space-sm);
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    
+    .hamburger:hover {
+      background: var(--bg-gray);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-blue);
+      text-decoration: none;
+    }
+    
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    
+    .search-bar {
+      flex: 1;
+      max-width: 480px;
+      margin-left: var(--space-xl);
+    }
+    
+    .search-wrapper {
+      position: relative;
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--icon-color);
+      font-size: 16px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 10px 16px 10px 42px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background: var(--bg-gray);
+      transition: all 0.2s;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+    
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-left: auto;
+    }
+    
+    .icon-btn {
+      background: none;
+      border: none;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      color: var(--text-dark);
+      font-size: 20px;
+      transition: all 0.2s;
+    }
+    
+    .icon-btn:hover {
+      background: var(--bg-gray);
+    }
+    
+    .icon-btn .badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      background: var(--danger-red);
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+    
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: var(--space-sm);
+    }
+    
+    .user-menu:hover {
+      background: var(--bg-gray);
+    }
+    
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary-blue);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .user-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-dark);
+      line-height: 1.2;
+    }
+    
+    .user-role {
+      font-size: 12px;
+      color: var(--text-light);
+      line-height: 1.2;
+    }
+    
+    .dropdown-arrow {
+      color: var(--icon-color);
+      font-size: 10px;
+      margin-left: 4px;
+    }
+    
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed;
+      top: var(--topbar-height);
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+      overflow-x: hidden;
+      z-index: 90;
+    }
+    
+    .sidebar.collapsed {
+      width: var(--sidebar-collapsed);
+    }
+    
+    .sidebar-menu {
+      list-style: none;
+      padding: var(--space-md) 0;
+    }
+    
+    .menu-section {
+      margin-bottom: var(--space-md);
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-sm) var(--space-md);
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    
+    .section-header:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #95A5A6;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.3s;
+    }
+    
+    .section-toggle {
+      color: #95A5A6;
+      font-size: 12px;
+      transition: transform 0.3s;
+    }
+    
+    .menu-section.collapsed .section-toggle {
+      transform: rotate(-90deg);
+    }
+    
+    .sidebar.collapsed .section-label,
+    .sidebar.collapsed .section-toggle {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+    
+    .menu-items {
+      list-style: none;
+      max-height: 500px;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    
+    .menu-section.collapsed .menu-items {
+      max-height: 0;
+    }
+    
+    .menu-item {
+      margin: 2px var(--space-sm);
+    }
+    
+    .menu-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px var(--space-md);
+      color: #ECF0F1;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.2s;
+      font-size: 14px;
+      font-weight: 500;
+      position: relative;
+    }
+    
+    .menu-link:hover {
+      background: var(--sidebar-hover);
+    }
+    
+    .menu-link.active {
+      background: var(--sidebar-active);
+      color: white;
+    }
+    
+    .menu-icon {
+      font-size: 8px;
+      min-width: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #BDC3C7;
+    }
+    
+    .menu-link.active .menu-icon {
+      color: white;
+    }
+    
+    .menu-text {
+      white-space: nowrap;
+      transition: all 0.3s;
+    }
+    
+    .sidebar.collapsed .menu-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+    
+    .menu-badge {
+      margin-left: auto;
+      background: var(--danger-red);
+      color: white;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    
+    .sidebar.collapsed .menu-badge {
+      opacity: 0;
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      margin-top: var(--topbar-height);
+      padding: var(--space-xl);
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: calc(100vh - var(--topbar-height));
+    }
+    
+    .sidebar.collapsed ~ .main-content {
+      margin-left: var(--sidebar-collapsed);
+    }
+    
+    /* PAGE HEADER */
+    .page-header {
+      margin-bottom: var(--space-xl);
+    }
+    
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+    
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-light);
+    }
+    
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+    }
+    
+    .stat-card {
+      background: white;
+      padding: var(--space-lg);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .stat-card.blue { border-left-color: var(--primary-blue); }
+    .stat-card.green { border-left-color: var(--success-green); }
+    .stat-card.orange { border-left-color: var(--warning-orange); }
+    .stat-card.red { border-left-color: var(--danger-red); }
+    
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--space-md);
+    }
+    
+    .stat-icon {
+      font-size: 32px;
+      opacity: 0.3;
+    }
+    
+    .stat-trend {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+    
+    .stat-trend.neutral {
+      background: #E3F2FD;
+      color: #1976D2;
+    }
+    
+    .stat-trend.down {
+      background: #FFEBEE;
+      color: #C62828;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-light);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    
+    /* CONTENT SECTION */
+    .content-section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      padding: var(--space-xl);
+      margin-bottom: var(--space-xl);
+    }
+    
+    .section-header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background: var(--primary-blue);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #3A7BC8;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .activity-placeholder {
+      text-align: center;
+      color: var(--text-light);
+      padding: 60px 20px;
+      font-size: 14px;
+    }
+    
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .search-bar {
+        display: none;
+      }
+      
+      .user-info {
+        display: none;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .topbar {
+        padding: 0 var(--space-md);
+      }
+    }
+    
+    /* SCROLLBAR */
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <a href="/dashboard.html" class="logo">
+        <div class="logo-icon">🏠</div>
+        <span>RentComPro</span>
+      </a>
+    </div>
+    
+    <div class="search-bar">
+      <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" placeholder="Search devices, clients, invoices...">
+      </div>
+    </div>
+    
+    <div class="topbar-right">
+      <button class="icon-btn" title="Notifications">
+        🔔
+        <span class="badge"></span>
+      </button>
+      
+      <button class="icon-btn" title="Help">
+        ❓
+      </button>
+      
+      <div class="user-menu" onclick="toggleUserMenu()">
+        <div class="user-avatar">BK</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Loading...</div>
+          <div class="user-role">Super Admin</div>
+        </div>
+        <span class="dropdown-arrow">▼</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+      <!-- MAIN -->
+      <li class="menu-section" id="section-main">
+        <div class="section-header" onclick="toggleSection('section-main')">
+          <div class="section-label">MAIN</div>
+          <div class="section-toggle">▼</div>
+        </div>
+        <ul class="menu-items">
+          <li class="menu-item">
+            <a href="/dashboard.html" class="menu-link active">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Dashboard</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      
+      <!-- MANAGEMENT -->
+      <li class="menu-section" id="section-management">
+        <div class="section-header" onclick="toggleSection('section-management')">
+          <div class="section-label">MANAGEMENT</div>
+          <div class="section-toggle">▼</div>
+        </div>
+        <ul class="menu-items">
+          <li class="menu-item">
+            <a href="/manage-devices.html" class="menu-link">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Devices</span>
+              <span class="menu-badge">12</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="/manage-clients.html" class="menu-link">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Clients</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="/rental-items.html" class="menu-link">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Rental Items</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      
+      <!-- BILLING -->
+      <li class="menu-section" id="section-billing">
+        <div class="section-header" onclick="toggleSection('section-billing')">
+          <div class="section-label">BILLING</div>
+          <div class="section-toggle">▼</div>
+        </div>
+        <ul class="menu-items">
+          <li class="menu-item">
+            <a href="/invoices.html" class="menu-link">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Invoices</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="/payments.html" class="menu-link">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Payments</span>
+              <span class="menu-badge">3</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="/item-master.html" class="menu-link">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Item Master</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      
+      <!-- MONITORING -->
+      <li class="menu-section" id="section-monitoring">
+        <div class="section-header" onclick="toggleSection('section-monitoring')">
+          <div class="section-label">MONITORING</div>
+          <div class="section-toggle">▼</div>
+        </div>
+        <ul class="menu-items">
+          <li class="menu-item">
+            <a href="/alerts.html" class="menu-link">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Alerts</span>
+              <span class="menu-badge">5</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="/reports.html" class="menu-link">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Reports</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="/maintenance.html" class="menu-link">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Maintenance</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      
+      <!-- SYSTEM -->
+      <li class="menu-section" id="section-system">
+        <div class="section-header" onclick="toggleSection('section-system')">
+          <div class="section-label">SYSTEM</div>
+          <div class="section-toggle">▼</div>
+        </div>
+        <ul class="menu-items">
+          <li class="menu-item">
+            <a href="/settings.html" class="menu-link">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Settings</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="#" class="menu-link" onclick="logout(); return false;">
+              <span class="menu-icon">●</span>
+              <span class="menu-text">Logout</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <h1 class="page-title">Welcome Back! 👋</h1>
+      <p class="page-subtitle">Here's what's happening with your rental business today</p>
+    </div>
+
+    <!-- STATS GRID -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-header">
+          <span class="stat-icon">💻</span>
+          <span class="stat-trend">↗ +8%</span>
+        </div>
+        <div class="stat-label">Total Devices</div>
+        <div class="stat-value" id="totalDevices">-</div>
+      </div>
+      
+      <div class="stat-card green">
+        <div class="stat-header">
+          <span class="stat-icon">👥</span>
+          <span class="stat-trend">↗ +12%</span>
+        </div>
+        <div class="stat-label">Active Clients</div>
+        <div class="stat-value" id="activeClients">-</div>
+      </div>
+      
+      <div class="stat-card orange">
+        <div class="stat-header">
+          <span class="stat-icon">💰</span>
+          <span class="stat-trend neutral">This Month</span>
+        </div>
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value" id="totalRevenue">₹-</div>
+      </div>
+      
+      <div class="stat-card red">
+        <div class="stat-header">
+          <span class="stat-icon">⏳</span>
+          <span class="stat-trend down">Due</span>
+        </div>
+        <div class="stat-label">Pending Payments</div>
+        <div class="stat-value" id="pendingPayments">₹-</div>
+      </div>
+    </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="content-section">
+      <div class="section-header-content">
+        <h2 class="section-title">Recent Activity</h2>
+        <a href="/activity.html" class="btn btn-primary">View All</a>
+      </div>
+      <div id="activityList">
+        <div class="activity-placeholder">Loading recent activity...</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_URL = isLocal ? 'http://localhost:8787' : 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
+    
+    // Toggle sidebar collapse/expand
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('collapsed');
+      localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }
+    
+    // Toggle section collapse/expand
+    function toggleSection(sectionId) {
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar.classList.contains('collapsed')) return;
+      
+      const section = document.getElementById(sectionId);
+      section.classList.toggle('collapsed');
+      
+      const collapsedSections = JSON.parse(localStorage.getItem('collapsedSections') || '[]');
+      if (section.classList.contains('collapsed')) {
+        if (!collapsedSections.includes(sectionId)) {
+          collapsedSections.push(sectionId);
+        }
+      } else {
+        const index = collapsedSections.indexOf(sectionId);
+        if (index > -1) {
+          collapsedSections.splice(index, 1);
+        }
+      }
+      localStorage.setItem('collapsedSections', JSON.stringify(collapsedSections));
+    }
+    
+    // Restore states
+    function restoreStates() {
+      if (localStorage.getItem('sidebarCollapsed') === 'true') {
+        document.getElementById('sidebar').classList.add('collapsed');
+      }
+      
+      const collapsedSections = JSON.parse(localStorage.getItem('collapsedSections') || '[]');
+      collapsedSections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+          section.classList.add('collapsed');
+        }
+      });
+    }
+    
+    // Check auth
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      
+      if (!token || !user) {
+        window.location.href = '/index.html';
+        return;
+      }
+      
+      const userData = JSON.parse(user);
+      document.getElementById('userName').textContent = userData.email.split('@')[0];
+      
+      loadDashboardData(token);
+    }
+    
+    // Load dashboard data
+    async function loadDashboardData(token) {
+      try {
+        const response = await fetch(`${API_URL}/api/dashboard/stats`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          const stats = data.data.stats;
+          document.getElementById('totalDevices').textContent = stats.totalDevices || 0;
+          document.getElementById('activeClients').textContent = stats.activeClients || 0;
+          document.getElementById('totalRevenue').textContent = '₹' + (stats.totalRevenue || 0).toFixed(0);
+          document.getElementById('pendingPayments').textContent = '₹' + (stats.pendingPayments || 0).toFixed(0);
+        }
+      } catch (error) {
+        console.error('Dashboard load error:', error);
+        document.getElementById('totalDevices').textContent = '0';
+        document.getElementById('activeClients').textContent = '0';
+        document.getElementById('totalRevenue').textContent = '₹0';
+        document.getElementById('pendingPayments').textContent = '₹0';
+      }
+    }
+    
+    // Logout
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/index.html';
+      }
+    }
+    
+    // Toggle user menu
+    function toggleUserMenu() {
+      alert('User menu - Profile, Settings, Logout options will appear here');
+    }
+    
+    // Mobile sidebar
+    if (window.innerWidth <= 768) {
+      const hamburger = document.querySelector('.hamburger');
+      hamburger.addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('mobile-open');
+      });
+    }
+    
+    // Initialize
+    restoreStates();
+    checkAuth();
+  </script>
+</body>
+</html>
