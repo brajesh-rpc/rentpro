@@ -57,15 +57,36 @@
       margin-bottom: 30px;
     }
     
+    /* Status Filters */
     .filters {
       background: white;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       margin-bottom: 20px;
+    }
+    
+    .filter-section {
+      margin-bottom: 15px;
+    }
+    
+    .filter-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .filter-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: block;
+    }
+    
+    .filter-buttons {
       display: flex;
-      gap: 15px;
-      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
     
     .filter-btn {
@@ -79,12 +100,70 @@
       transition: all 0.3s;
     }
     
+    .filter-btn:hover {
+      border-color: #667eea;
+    }
+    
     .filter-btn.active {
       background: #667eea;
       color: white;
       border-color: #667eea;
     }
     
+    /* Dropdown Filters */
+    .filter-selects {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .filter-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+    }
+    
+    .filter-select {
+      padding: 10px 15px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+      cursor: pointer;
+      min-width: 200px;
+      transition: all 0.3s;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .reset-btn {
+      padding: 10px 20px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      align-self: flex-end;
+    }
+    
+    .reset-btn:hover {
+      background: #dc2626;
+    }
+    
+    /* Table */
     .invoices-table {
       background: white;
       border-radius: 10px;
@@ -178,6 +257,33 @@
       padding: 60px;
       color: #999;
     }
+    
+    .summary-bar {
+      background: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .summary-item {
+      text-align: center;
+    }
+    
+    .summary-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .summary-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+    }
   </style>
 </head>
 <body>
@@ -194,14 +300,64 @@
       <h2>📄 Invoices</h2>
     </div>
 
-    <div class="filters">
-      <button class="filter-btn active" onclick="filterInvoices('all')">All</button>
-      <button class="filter-btn" onclick="filterInvoices('PAID')">Paid</button>
-      <button class="filter-btn" onclick="filterInvoices('UNPAID')">Unpaid</button>
-      <button class="filter-btn" onclick="filterInvoices('OVERDUE')">Overdue</button>
-      <button class="filter-btn" onclick="filterInvoices('PARTIAL')">Partial</button>
+    <!-- Summary Bar -->
+    <div class="summary-bar">
+      <div class="summary-item">
+        <div class="summary-label">Total Invoices</div>
+        <div class="summary-value" id="totalCount">0</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Total Amount</div>
+        <div class="summary-value" id="totalAmount">₹0</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Paid</div>
+        <div class="summary-value" id="paidAmount">₹0</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Pending</div>
+        <div class="summary-value" id="pendingAmount">₹0</div>
+      </div>
     </div>
 
+    <!-- Filters -->
+    <div class="filters">
+      <!-- Status Filter -->
+      <div class="filter-section">
+        <span class="filter-label">📊 Filter by Status</span>
+        <div class="filter-buttons">
+          <button class="filter-btn active" onclick="filterByStatus('all')">All</button>
+          <button class="filter-btn" onclick="filterByStatus('PAID')">Paid</button>
+          <button class="filter-btn" onclick="filterByStatus('UNPAID')">Unpaid</button>
+          <button class="filter-btn" onclick="filterByStatus('OVERDUE')">Overdue</button>
+          <button class="filter-btn" onclick="filterByStatus('PARTIAL')">Partial</button>
+        </div>
+      </div>
+
+      <!-- Client & Month Filters -->
+      <div class="filter-section">
+        <span class="filter-label">🔍 Advanced Filters</span>
+        <div class="filter-selects">
+          <div class="filter-group">
+            <label>👥 Client</label>
+            <select class="filter-select" id="clientFilter" onchange="applyFilters()">
+              <option value="">All Clients</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label>📅 Month</label>
+            <select class="filter-select" id="monthFilter" onchange="applyFilters()">
+              <option value="">All Months</option>
+            </select>
+          </div>
+          
+          <button class="reset-btn" onclick="resetFilters()">🔄 Reset All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invoices Table -->
     <div class="invoices-table">
       <table>
         <thead>
@@ -229,7 +385,10 @@
     const API_URL = isLocal ? 'http://localhost:8787' : 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
 
     let allInvoices = [];
-    let currentFilter = 'all';
+    let filteredInvoices = [];
+    let currentStatusFilter = 'all';
+    let currentClientFilter = '';
+    let currentMonthFilter = '';
 
     // Load invoices
     async function loadInvoices() {
@@ -243,11 +402,116 @@
         const data = await response.json();
         if (data.success) {
           allInvoices = data.data;
-          displayInvoices(allInvoices);
+          populateFilters();
+          applyFilters();
         }
       } catch (error) {
         console.error('Load invoices error:', error);
       }
+    }
+
+    // Populate filter dropdowns
+    function populateFilters() {
+      // Populate clients filter
+      const clientFilter = document.getElementById('clientFilter');
+      const uniqueClients = [...new Set(allInvoices.map(inv => 
+        inv.clients ? JSON.stringify({id: inv.client_id, name: inv.clients.company_name}) : null
+      ))].filter(c => c !== null).map(c => JSON.parse(c));
+      
+      clientFilter.innerHTML = '<option value="">All Clients</option>' +
+        uniqueClients.map(client => 
+          `<option value="${client.id}">${client.name}</option>`
+        ).join('');
+
+      // Populate months filter
+      const monthFilter = document.getElementById('monthFilter');
+      const uniqueMonths = [...new Set(allInvoices.map(inv => {
+        const date = new Date(inv.invoice_date);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }))].sort().reverse();
+      
+      monthFilter.innerHTML = '<option value="">All Months</option>' +
+        uniqueMonths.map(month => {
+          const [year, mon] = month.split('-');
+          const monthName = new Date(year, mon - 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' });
+          return `<option value="${month}">${monthName}</option>`;
+        }).join('');
+    }
+
+    // Filter by status
+    function filterByStatus(status) {
+      currentStatusFilter = status;
+      
+      // Update button states
+      document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      applyFilters();
+    }
+
+    // Apply all filters
+    function applyFilters() {
+      currentClientFilter = document.getElementById('clientFilter').value;
+      currentMonthFilter = document.getElementById('monthFilter').value;
+      
+      filteredInvoices = allInvoices.filter(inv => {
+        // Status filter
+        if (currentStatusFilter !== 'all' && inv.status !== currentStatusFilter) {
+          return false;
+        }
+        
+        // Client filter
+        if (currentClientFilter && inv.client_id !== currentClientFilter) {
+          return false;
+        }
+        
+        // Month filter
+        if (currentMonthFilter) {
+          const invDate = new Date(inv.invoice_date);
+          const invMonth = `${invDate.getFullYear()}-${String(invDate.getMonth() + 1).padStart(2, '0')}`;
+          if (invMonth !== currentMonthFilter) {
+            return false;
+          }
+        }
+        
+        return true;
+      });
+      
+      displayInvoices(filteredInvoices);
+      updateSummary(filteredInvoices);
+    }
+
+    // Reset all filters
+    function resetFilters() {
+      currentStatusFilter = 'all';
+      currentClientFilter = '';
+      currentMonthFilter = '';
+      
+      // Reset UI
+      document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelectorAll('.filter-buttons .filter-btn')[0].classList.add('active');
+      document.getElementById('clientFilter').value = '';
+      document.getElementById('monthFilter').value = '';
+      
+      applyFilters();
+    }
+
+    // Update summary
+    function updateSummary(invoices) {
+      const totalCount = invoices.length;
+      const totalAmount = invoices.reduce((sum, inv) => sum + parseFloat(inv.total_amount), 0);
+      const paidAmount = invoices.filter(inv => inv.status === 'PAID')
+        .reduce((sum, inv) => sum + parseFloat(inv.total_amount), 0);
+      const pendingAmount = totalAmount - paidAmount;
+      
+      document.getElementById('totalCount').textContent = totalCount;
+      document.getElementById('totalAmount').textContent = `₹${totalAmount.toFixed(0)}`;
+      document.getElementById('paidAmount').textContent = `₹${paidAmount.toFixed(0)}`;
+      document.getElementById('pendingAmount').textContent = `₹${pendingAmount.toFixed(0)}`;
     }
 
     // Display invoices
@@ -255,7 +519,7 @@
       const tbody = document.getElementById('invoicesList');
       
       if (invoices.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">No invoices found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999; padding: 40px;">No invoices found</td></tr>';
         return;
       }
 
@@ -284,24 +548,6 @@
       }).join('');
     }
 
-    // Filter invoices
-    function filterInvoices(status) {
-      currentFilter = status;
-      
-      // Update button states
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      event.target.classList.add('active');
-      
-      if (status === 'all') {
-        displayInvoices(allInvoices);
-      } else {
-        const filtered = allInvoices.filter(inv => inv.status === status);
-        displayInvoices(filtered);
-      }
-    }
-
     // Format date
     function formatDate(dateStr) {
       const date = new Date(dateStr);
@@ -319,15 +565,15 @@
 
     // Mark as paid
     function markAsPaid(id, totalAmount) {
-      const paymentDate = prompt('Payment Date (YYYY-MM-DD):');
+      const paymentDate = prompt('Payment Date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
       if (!paymentDate) return;
       
-      const amountPaid = prompt(`Amount Received (Total: ₹${totalAmount}):`);
+      const amountPaid = prompt(`Amount Received (Total: ₹${totalAmount}):`, totalAmount);
       if (!amountPaid) return;
       
-      const paymentMode = prompt('Payment Mode (Cash/Cheque/NEFT/UPI):');
+      const paymentMode = prompt('Payment Mode:', 'CASH');
+      if (!paymentMode) return;
       
-      // Save payment
       savePayment(id, paymentDate, parseFloat(amountPaid), paymentMode);
     }
 
