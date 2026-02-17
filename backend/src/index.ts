@@ -10,7 +10,7 @@ import { receiveDeviceStats } from './devices/stats';
 import { addDevice, getDevices } from './devices/management';
 import { registerClient, getClients, getClient, updateClient, deleteClient } from './clients/management';
 import { addRentalItem, getClientRentalItems, getRentalItemHistory, removeRentalItem } from './rental-items/management';
-import { getLastInvoice, createInvoice, getInvoices, getInvoice, markInvoicePaid, getClientLastInvoice } from './invoices/management';
+import { getLastInvoice, createInvoice, updateInvoice, getInvoices, getInvoice, markInvoicePaid, getClientLastInvoice } from './invoices/management';
 import { getItems, getActiveItems, getItem, createItem, updateItem, toggleItemActive, deleteItem } from './items/management';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -97,6 +97,7 @@ app.get('/api/invoices/last', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'
 app.post('/api/invoices', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), createInvoice);
 app.get('/api/invoices', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getInvoices);
 app.get('/api/invoices/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getInvoice);
+app.put('/api/invoices/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), updateInvoice);
 app.post('/api/invoices/:id/pay', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), markInvoicePaid);
 app.get('/api/invoices/client/:clientId/last', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getClientLastInvoice);
 

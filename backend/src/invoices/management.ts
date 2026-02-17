@@ -90,7 +90,7 @@ export async function createInvoice(c: Context<{ Bindings: Env }>): Promise<Resp
     if (existing) {
       return c.json({
         success: false,
-        message: 'Invoice number already exists'
+        message: `⚠️ Invoice number "${invoiceNumber}" already exists! Please use a different invoice number.`
       }, 400);
     }
 
@@ -153,6 +153,132 @@ export async function createInvoice(c: Context<{ Bindings: Env }>): Promise<Resp
     return c.json({
       success: false,
       message: 'Failed to create invoice'
+    }, 500);
+  }
+}
+
+// Update invoice (only UNPAID invoices can be edited)
+export async function updateInvoice(c: Context<{ Bindings: Env }>): Promise<Response> {
+  try {
+    const { id } = c.req.param();
+    const body = await c.req.json();
+    
+    const {
+      invoiceNumber,
+      referenceNumber,
+      invoiceDate,
+      periodFrom,
+      periodTo,
+      dueDate,
+      hasGst,
+      items,
+      previousOutstanding,
+      notes
+    } = body;
+
+    const supabase = getSupabaseClient(c.env);
+
+    // Get existing invoice
+    const { data: existingInvoice, error: fetchError } = await supabase
+      .from('invoices')
+      .select('status, invoice_number')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !existingInvoice) {
+      return c.json({
+        success: false,
+        message: 'Invoice not found'
+      }, 404);
+    }
+
+    // Only allow editing UNPAID invoices
+    if (existingInvoice.status !== 'UNPAID') {
+      return c.json({
+        success: false,
+        message: `Cannot edit invoice with status "${existingInvoice.status}". Only UNPAID invoices can be edited.`
+      }, 400);
+    }
+
+    // Check if invoice number is being changed and already exists
+    if (invoiceNumber !== existingInvoice.invoice_number) {
+      const { data: duplicate } = await supabase
+        .from('invoices')
+        .select('id')
+        .eq('invoice_number', invoiceNumber)
+        .single();
+
+      if (duplicate) {
+        return c.json({
+          success: false,
+          message: `⚠️ Invoice number "${invoiceNumber}" already exists! Please use a different invoice number.`
+        }, 400);
+      }
+    }
+
+    // Calculate totals
+    let subtotal = 0;
+    items.forEach((item: any) => {
+      subtotal += parseFloat(item.amount);
+    });
+
+    const gstAmount = hasGst ? (subtotal + (previousOutstanding || 0)) * 0.18 : 0;
+    const totalAmount = subtotal + (previousOutstanding || 0) + gstAmount;
+
+    // Update invoice
+    const { error: updateError } = await supabase
+      .from('invoices')
+      .update({
+        invoice_number: invoiceNumber,
+        reference_number: referenceNumber,
+        invoice_date: invoiceDate,
+        period_from: periodFrom,
+        period_to: periodTo,
+        due_date: dueDate,
+        has_gst: hasGst,
+        subtotal,
+        previous_outstanding: previousOutstanding || 0,
+        gst_amount: gstAmount,
+        total_amount: totalAmount,
+        notes,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (updateError) throw updateError;
+
+    // Delete existing items
+    await supabase
+      .from('invoice_items')
+      .delete()
+      .eq('invoice_id', id);
+
+    // Insert new items
+    const itemsToInsert = items.map((item: any) => ({
+      invoice_id: id,
+      item_type: item.itemType,
+      description: item.description,
+      quantity: item.quantity,
+      rate: item.rate,
+      amount: item.amount,
+      hsn_sac_code: item.hsnSacCode
+    }));
+
+    const { error: itemsError } = await supabase
+      .from('invoice_items')
+      .insert(itemsToInsert);
+
+    if (itemsError) throw itemsError;
+
+    return c.json({
+      success: true,
+      message: 'Invoice updated successfully'
+    });
+  } catch (error) {
+    console.error('Update invoice error:', error);
+    return c.json({
+      success: false,
+      message: 'Failed to update invoice'
     }, 500);
   }
 }

@@ -247,6 +247,11 @@
       color: white;
     }
     
+    .btn-edit {
+      background: #f59e0b;
+      color: white;
+    }
+    
     .btn-pay {
       background: #10b981;
       color: white;
@@ -538,6 +543,9 @@
             <td>
               <div class="btn-group">
                 <button class="btn-sm btn-view" onclick="viewInvoice('${inv.id}')">👁️ View</button>
+                ${inv.status === 'UNPAID' ? 
+                  `<button class="btn-sm btn-edit" onclick="editInvoice('${inv.id}')">✏️ Edit</button>` 
+                  : ''}
                 ${inv.status !== 'PAID' ? 
                   `<button class="btn-sm btn-pay" onclick="markAsPaid('${inv.id}', ${inv.total_amount})">💰 Pay</button>` 
                   : ''}
@@ -561,6 +569,11 @@
     // View invoice
     function viewInvoice(id) {
       window.location.href = `/view-invoice.html?id=${id}`;
+    }
+
+    // Edit invoice
+    function editInvoice(id) {
+      window.location.href = `/edit-invoice.html?id=${id}`;
     }
 
     // Mark as paid
