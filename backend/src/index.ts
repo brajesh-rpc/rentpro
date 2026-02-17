@@ -8,7 +8,7 @@ import { authMiddleware, requireRole } from './middleware/auth';
 import { getDashboardStats, getRecentActivity } from './dashboard/stats';
 import { receiveDeviceStats } from './devices/stats';
 import { addDevice, getDevices } from './devices/management';
-import { registerClient, getClients, getClient, updateClient } from './clients/management';
+import { registerClient, getClients, getClient, updateClient, deleteClient } from './clients/management';
 import { addRentalItem, getClientRentalItems, getRentalItemHistory, removeRentalItem } from './rental-items/management';
 import { getLastInvoice, createInvoice, getInvoices, getInvoice, markInvoicePaid, getClientLastInvoice } from './invoices/management';
 import { getItems, getActiveItems, getItem, createItem, updateItem, toggleItemActive, deleteItem } from './items/management';
@@ -84,6 +84,7 @@ app.post('/api/clients', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), re
 app.get('/api/clients', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getClients);
 app.get('/api/clients/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getClient);
 app.put('/api/clients/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), updateClient);
+app.delete('/api/clients/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), deleteClient);
 
 // Rental Items Management (Protected - Admin only)
 app.post('/api/rental-items', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), addRentalItem);
