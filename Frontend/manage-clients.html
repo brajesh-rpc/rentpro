@@ -19,7 +19,7 @@
     
     .navbar {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 15px 30px;
+      padding: 12px 30px;
       color: white;
       display: flex;
       justify-content: space-between;
@@ -28,21 +28,22 @@
     }
     
     .navbar h1 {
-      font-size: 24px;
+      font-size: 20px;
     }
     
     .nav-links {
       display: flex;
-      gap: 20px;
+      gap: 15px;
       align-items: center;
     }
     
     .nav-links a {
       color: white;
       text-decoration: none;
-      padding: 8px 15px;
+      padding: 6px 12px;
       border-radius: 5px;
       transition: background 0.3s;
+      font-size: 14px;
     }
     
     .nav-links a:hover {
@@ -51,7 +52,7 @@
     
     .container {
       max-width: 1400px;
-      margin: 30px auto;
+      margin: 20px auto;
       padding: 0 20px;
     }
     
@@ -59,49 +60,49 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
     
     .header-section h2 {
       color: #333;
-      font-size: 28px;
+      font-size: 24px;
     }
     
     .btn-add {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 12px 25px;
+      padding: 8px 18px;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
+      border-radius: 6px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       transition: all 0.3s;
     }
     
     .btn-add:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
     
     .search-bar {
       background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 15px;
     }
     
     .search-bar input {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 16px;
+      border-radius: 6px;
+      font-size: 14px;
     }
     
     .search-bar input:focus {
@@ -111,21 +112,21 @@
     
     .clients-grid {
       display: grid;
-      gap: 20px;
+      gap: 12px;
     }
     
     .client-card {
       background: white;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       transition: all 0.3s;
-      border-left: 4px solid #667eea;
+      border-left: 3px solid #667eea;
     }
     
     .client-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     
     .client-card.overdue {
@@ -140,26 +141,26 @@
     .client-header {
       display: flex;
       justify-content: space-between;
-      align-items: start;
-      margin-bottom: 15px;
+      align-items: center;
+      margin-bottom: 10px;
     }
     
     .client-name {
-      font-size: 20px;
+      font-size: 16px;
       font-weight: 700;
       color: #333;
-      margin-bottom: 5px;
     }
     
     .client-owner {
       color: #666;
-      font-size: 14px;
+      font-size: 13px;
+      margin-top: 3px;
     }
     
     .status-badge {
-      padding: 5px 12px;
-      border-radius: 15px;
-      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
       font-weight: 600;
     }
     
@@ -181,41 +182,42 @@
     .client-info {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-bottom: 15px;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13px;
     }
     
     .info-item {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 3px;
     }
     
     .info-label {
-      font-size: 12px;
+      font-size: 11px;
       color: #999;
       text-transform: uppercase;
     }
     
     .info-value {
-      font-size: 14px;
+      font-size: 13px;
       color: #333;
       font-weight: 500;
     }
     
     .client-actions {
       display: flex;
-      gap: 10px;
-      padding-top: 15px;
-      border-top: 1px solid #e5e7eb;
+      gap: 6px;
+      padding-top: 10px;
+      border-top: 1px solid #f0f0f0;
     }
     
     .btn-action {
       flex: 1;
-      padding: 10px;
+      padding: 7px 10px;
       border: none;
-      border-radius: 6px;
-      font-size: 14px;
+      border-radius: 5px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
@@ -239,31 +241,42 @@
       background: #059669;
     }
     
-    .btn-assets {
-      background: #f59e0b;
+    .btn-invoice {
+      background: #667eea;
       color: white;
     }
     
-    .btn-assets:hover {
-      background: #d97706;
+    .btn-invoice:hover {
+      background: #5568d3;
+    }
+    
+    .btn-delete {
+      background: #ef4444;
+      color: white;
+      flex: 0.5;
+    }
+    
+    .btn-delete:hover {
+      background: #dc2626;
     }
     
     .loading {
       text-align: center;
-      padding: 60px;
+      padding: 40px;
       color: #999;
+      font-size: 14px;
     }
     
     .empty-state {
       text-align: center;
-      padding: 60px;
+      padding: 40px;
       background: white;
-      border-radius: 10px;
+      border-radius: 8px;
     }
     
     .empty-state .icon {
-      font-size: 64px;
-      margin-bottom: 20px;
+      font-size: 48px;
+      margin-bottom: 15px;
       opacity: 0.5;
     }
   </style>
@@ -273,8 +286,7 @@
     <h1>🔐 RentComPro</h1>
     <div class="nav-links">
       <a href="/dashboard.html">Dashboard</a>
-      <a href="/manage-clients.html">Manage Clients</a>
-      <a href="/add-device.html">Add Device</a>
+      <a href="/invoices.html">Invoices</a>
     </div>
   </nav>
 
@@ -282,12 +294,12 @@
     <div class="header-section">
       <h2>👥 Manage Clients</h2>
       <a href="/register-client.html" class="btn-add">
-        <span>➕</span> Add New Client
+        <span>➕</span> Add Client
       </a>
     </div>
 
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="🔍 Search by company name, owner, phone, or city...">
+      <input type="text" id="searchInput" placeholder="🔍 Search by company, owner, phone, or city...">
     </div>
 
     <div id="clientsList" class="clients-grid">
@@ -301,7 +313,7 @@
 
     let allClients = [];
 
-    // Load clients on page load
+    // Load clients
     async function loadClients() {
       const token = localStorage.getItem('token');
       
@@ -312,7 +324,6 @@
 
       try {
         const response = await fetch(`${API_URL}/api/clients`, {
-          method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -362,11 +373,11 @@
                            client.status === 'INACTIVE' ? 'inactive' : 'active';
 
         return `
-          <div class="client-card ${statusClass}">
+          <div class="client-card ${statusClass}" id="client-${client.id}">
             <div class="client-header">
               <div>
                 <div class="client-name">${client.company_name}</div>
-                <div class="client-owner">Owner: ${client.owner_name}</div>
+                <div class="client-owner">👤 ${client.owner_name}</div>
               </div>
               <span class="status-badge ${statusClass}">
                 ${client.status}
@@ -375,31 +386,31 @@
 
             <div class="client-info">
               <div class="info-item">
-                <span class="info-label">Phone</span>
+                <span class="info-label">📞 Phone</span>
                 <span class="info-value">${client.phone}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Location</span>
+                <span class="info-label">📍 Location</span>
                 <span class="info-value">${client.city}, ${client.state}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Business Type</span>
+                <span class="info-label">🏢 Type</span>
                 <span class="info-value">${client.business_type || 'N/A'}</span>
               </div>
             </div>
 
             <div class="client-actions">
               <button class="btn-action btn-view" onclick="viewClient('${client.id}')">
-                👁️ View Details
+                👁️ View
               </button>
               <button class="btn-action btn-edit" onclick="editClient('${client.id}')">
                 ✏️ Edit
               </button>
-              <button class="btn-action btn-assets" onclick="manageAssets('${client.id}')">
-                📦 Manage Assets
+              <button class="btn-action btn-invoice" onclick="generateInvoice('${client.id}')">
+                📄 Invoice
               </button>
-              <button class="btn-action btn-primary" onclick="generateInvoice('${client.id}')" style="background: #667eea; color: white;">
-                📄 Generate Invoice
+              <button class="btn-action btn-delete" onclick="deleteClient('${client.id}', '${client.company_name}')">
+                🗑️
               </button>
             </div>
           </div>
@@ -407,7 +418,7 @@
       }).join('');
     }
 
-    // Search functionality
+    // Search
     document.getElementById('searchInput').addEventListener('input', (e) => {
       const searchTerm = e.target.value.toLowerCase();
       
@@ -421,21 +432,60 @@
       displayClients(filtered);
     });
 
-    // Action functions
+    // View client
     function viewClient(id) {
       window.location.href = `/view-client.html?id=${id}`;
     }
 
+    // Edit client
     function editClient(id) {
       window.location.href = `/edit-client.html?id=${id}`;
     }
 
-    function manageAssets(id) {
-      window.location.href = `/manage-assets.html?clientId=${id}`;
-    }
-
+    // Generate invoice
     function generateInvoice(id) {
       window.location.href = `/create-invoice.html?clientId=${id}`;
+    }
+
+    // Delete client
+    async function deleteClient(id, name) {
+      if (!confirm(`⚠️ Are you sure you want to delete "${name}"?\n\nThis will also delete:\n• All invoices\n• All rental items\n• All payment records\n\nThis action cannot be undone!`)) {
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+
+      try {
+        const response = await fetch(`${API_URL}/api/clients/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Remove from UI
+          document.getElementById(`client-${id}`).remove();
+          
+          // Update allClients array
+          allClients = allClients.filter(c => c.id !== id);
+          
+          alert(`✅ Client "${name}" deleted successfully!`);
+          
+          // Reload if no clients left
+          if (allClients.length === 0) {
+            loadClients();
+          }
+        } else {
+          alert(`❌ Failed to delete client: ${data.message}`);
+        }
+      } catch (error) {
+        console.error('Delete client error:', error);
+        alert('❌ Failed to delete client. Please try again.');
+      }
     }
 
     // Load clients on page load
