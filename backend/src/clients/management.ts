@@ -201,3 +201,51 @@ export async function updateClient(c: Context<{ Bindings: Env }>): Promise<Respo
     }, 500);
   }
 }
+
+// Delete client
+export async function deleteClient(c: Context<{ Bindings: Env }>): Promise<Response> {
+  try {
+    const { id } = c.req.param();
+    const supabase = getSupabaseClient(c.env);
+
+    // Check if client exists
+    const { data: client, error: fetchError } = await supabase
+      .from('clients')
+      .select('company_name')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !client) {
+      return c.json({
+        success: false,
+        message: 'Client not found'
+      }, 404);
+    }
+
+    // Delete client (CASCADE will handle related records)
+    const { error: deleteError } = await supabase
+      .from('clients')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error('Delete client error:', deleteError);
+      return c.json({
+        success: false,
+        message: 'Failed to delete client'
+      }, 500);
+    }
+
+    return c.json({
+      success: true,
+      message: `Client "${client.company_name}" deleted successfully`
+    });
+
+  } catch (error) {
+    console.error('Delete client error:', error);
+    return c.json({
+      success: false,
+      message: 'Internal server error'
+    }, 500);
+  }
+}
