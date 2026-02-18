@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Monitor - RentComPro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #4A90E2;
+      --green: #22C55E;
+      --red: #EF4444;
+      --orange: #F59E0B;
+      --purple: #9C27B0;
+      --bg: #F5F7FA;
+      --sidebar-bg: #3B4D61;
+      --sidebar-active: #4A90E2;
+      --text-dark: #2C3E50;
+      --text-light: #7F8C9A;
+      --border: #E1E8ED;
+      --white: #ffffff;
+      --sidebar-width: 220px;
+      --sidebar-collapsed: 60px;
+      --topbar-height: 60px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text-dark);
+      overflow-x: hidden;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--topbar-height);
+      background: white;
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      display: flex; align-items: center;
+      padding: 0 20px; z-index: 100; gap: 16px;
+    }
+    .hamburger {
+      background: none; border: none; font-size: 22px;
+      cursor: pointer; padding: 8px; border-radius: 6px;
+      color: var(--text-dark); transition: background 0.2s;
+    }
+    .hamburger:hover { background: var(--bg); }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 18px; font-weight: 700; color: var(--primary);
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 6px; display: flex; align-items: center;
+      justify-content: center; font-size: 18px;
+    }
+    .topbar-right {
+      display: flex; align-items: center;
+      gap: 8px; margin-left: auto;
+    }
+    .user-menu {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 12px; border-radius: 8px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .user-menu:hover { background: var(--bg); }
+    .user-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--primary); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 14px;
+    }
+    .user-name { font-size: 14px; font-weight: 600; }
+    .user-role { font-size: 12px; color: var(--text-light); }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed; top: var(--topbar-height);
+      left: 0; bottom: 0; width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+      overflow-y: auto; overflow-x: hidden; z-index: 90;
+    }
+    .sidebar.collapsed { width: var(--sidebar-collapsed); }
+    .sidebar-menu { list-style: none; padding: 16px 0; }
+    .menu-section { margin-bottom: 16px; }
+    .section-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px; cursor: pointer;
+      transition: background 0.2s; user-select: none;
+    }
+    .section-header:hover { background: rgba(255,255,255,0.05); }
+    .section-label {
+      font-size: 11px; text-transform: uppercase;
+      color: #95A5A6; font-weight: 600; letter-spacing: 0.5px;
+      transition: all 0.3s;
+    }
+    .section-toggle { color: #95A5A6; font-size: 12px; transition: transform 0.3s; }
+    .menu-section.collapsed .section-toggle { transform: rotate(-90deg); }
+    .sidebar.collapsed .section-label,
+    .sidebar.collapsed .section-toggle { opacity: 0; width: 0; overflow: hidden; }
+    .menu-items {
+      list-style: none; max-height: 500px;
+      overflow: hidden; transition: max-height 0.3s ease-out;
+    }
+    .menu-section.collapsed .menu-items { max-height: 0; }
+    .menu-item { margin: 2px 8px; }
+    .menu-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 16px; color: #ECF0F1;
+      text-decoration: none; border-radius: 6px;
+      transition: background 0.2s; font-size: 14px; font-weight: 500;
+    }
+    .menu-link:hover { background: #475766; }
+    .menu-link.active { background: var(--sidebar-active); color: white; }
+    .menu-icon { font-size: 8px; min-width: 8px; color: #BDC3C7; }
+    .menu-link.active .menu-icon { color: white; }
+    .menu-text { white-space: nowrap; transition: all 0.3s; }
+    .sidebar.collapsed .menu-text { opacity: 0; width: 0; overflow: hidden; }
+    .menu-badge {
+      margin-left: auto; background: var(--red); color: white;
+      font-size: 10px; padding: 2px 7px; border-radius: 10px;
+      font-weight: 600; transition: all 0.3s;
+    }
+    .sidebar.collapsed .menu-badge { opacity: 0; width: 0; padding: 0; overflow: hidden; }
+    .sidebar::-webkit-scrollbar { width: 6px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+    /* ── MAIN CONTENT ── */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      margin-top: var(--topbar-height);
+      padding: 24px;
+      transition: margin-left 0.3s cubic-bezier(0.4,0,0.2,1);
+      min-height: calc(100vh - var(--topbar-height));
+    }
+    .sidebar.collapsed ~ .main-content { margin-left: var(--sidebar-collapsed); }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 24px;
+    }
+    .page-title { font-size: 26px; font-weight: 700; color: var(--text-dark); }
+    .page-subtitle { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+
+    .refresh-indicator {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-light);
+    }
+    .refresh-dot {
+      width: 8px; height: 8px; background: var(--green);
+      border-radius: 50%; animation: pulse 2s infinite;
+    }
+    .refresh-dot.paused { background: #9E9E9E; animation: none; }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    .btn {
+      padding: 9px 18px; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; display: inline-flex;
+      align-items: center; gap: 6px;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #3A7BC8; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .btn-outline {
+      background: white; color: var(--text-dark);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ── SUMMARY CARDS ── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px; margin-bottom: 24px;
+    }
+    @media (max-width: 1200px) { .summary-grid { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width: 768px) { .summary-grid { grid-template-columns: repeat(2,1fr); } }
+
+    .summary-card {
+      background: white; border-radius: 12px;
+      padding: 16px; box-shadow: var(--shadow-sm);
+      border: 2px solid transparent;
+      transition: all 0.2s; cursor: pointer;
+      text-align: center;
+    }
+    .summary-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .summary-card.active-filter { border-color: var(--primary); background: #EBF4FF; }
+    .summary-card-icon { font-size: 24px; margin-bottom: 8px; }
+    .summary-card-value {
+      font-size: 32px; font-weight: 700;
+      line-height: 1.1; margin-bottom: 4px;
+    }
+    .summary-card-label {
+      font-size: 11px; color: var(--text-light);
+      font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .summary-card.s-total .summary-card-value { color: var(--text-dark); }
+    .summary-card.s-online .summary-card-value { color: var(--green); }
+    .summary-card.s-offline .summary-card-value { color: var(--red); }
+    .summary-card.s-superwatch .summary-card-value { color: var(--purple); }
+    .summary-card.s-alerts .summary-card-value { color: var(--orange); }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      display: flex; align-items: center;
+      gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .filter-label { font-size: 12px; color: var(--text-light); font-weight: 500; }
+    .filter-btn {
+      padding: 5px 14px; border: 1px solid var(--border);
+      border-radius: 20px; font-size: 12px; font-weight: 500;
+      cursor: pointer; background: white; color: var(--text-light);
+      transition: all 0.2s;
+    }
+    .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .filter-btn:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
+
+    /* ── DEVICE GRID ── */
+    .device-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 16px; margin-bottom: 24px;
+    }
+
+    .device-card {
+      background: white; border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 16px; transition: all 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .device-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+    .device-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+    }
+    .device-card.c-online::before { background: var(--green); }
+    .device-card.c-offline::before { background: var(--red); }
+    .device-card.c-never-seen::before { background: #9E9E9E; }
+    .device-card.c-recently::before { background: var(--orange); }
+    .device-card.c-superwatch::before {
+      background: linear-gradient(90deg, var(--purple), #E91E63);
+      height: 4px;
+    }
+
+    /* SUPERWATCH glow */
+    .device-card.c-superwatch {
+      border-color: rgba(156,39,176,0.3);
+      box-shadow: 0 0 0 2px rgba(156,39,176,0.08);
+    }
+
+    .device-card-top {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; margin-bottom: 10px;
+    }
+    .device-title { flex: 1; }
+    .device-name { font-size: 15px; font-weight: 700; color: var(--text-dark); }
+    .device-serial { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+    .status-pill {
+      font-size: 10px; font-weight: 700;
+      padding: 3px 10px; border-radius: 20px;
+      white-space: nowrap; letter-spacing: 0.3px;
+    }
+    .status-pill.online { background: #DCFCE7; color: #15803D; }
+    .status-pill.offline { background: #FEE2E2; color: #B91C1C; }
+    .status-pill.never-seen { background: #F3F4F6; color: #6B7280; }
+    .status-pill.recently { background: #FEF3C7; color: #B45309; }
+    .status-pill.long-offline { background: #FEE2E2; color: #991B1B; }
+    .status-pill.superwatch {
+      background: linear-gradient(135deg, #9C27B0, #E91E63);
+      color: white;
+    }
+
+    /* SUPERWATCH banner */
+    .superwatch-banner {
+      background: linear-gradient(135deg, #9C27B0, #6A1B9A);
+      color: white; font-size: 10px; font-weight: 700;
+      padding: 5px 10px; border-radius: 6px;
+      display: flex; align-items: center; gap: 5px;
+      margin-bottom: 10px; letter-spacing: 0.5px;
+    }
+    .sw-blink {
+      width: 6px; height: 6px; background: #FF4081;
+      border-radius: 50%; animation: blink 1s infinite;
+    }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+    .sw-reason { font-weight: 400; opacity: 0.85; font-size: 9px; }
+
+    /* Client info */
+    .device-client {
+      font-size: 12px; color: var(--text-light);
+      margin-bottom: 12px; display: flex;
+      align-items: center; gap: 4px;
+    }
+    .no-client { font-style: italic; }
+
+    /* Resource bars */
+    .resource-bars { margin-bottom: 12px; }
+    .resource-row {
+      display: flex; align-items: center;
+      gap: 8px; margin-bottom: 5px;
+    }
+    .res-label {
+      font-size: 10px; color: var(--text-light);
+      width: 28px; flex-shrink: 0; font-weight: 600;
+    }
+    .bar-track {
+      flex: 1; height: 5px;
+      background: #F1F5F9; border-radius: 3px; overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 3px;
+      transition: width 0.6s ease;
+    }
+    .bar-fill.low { background: var(--green); }
+    .bar-fill.med { background: var(--orange); }
+    .bar-fill.high { background: var(--red); }
+    .res-val {
+      font-size: 10px; font-weight: 700;
+      color: var(--text-dark); width: 30px;
+      text-align: right; flex-shrink: 0;
+    }
+    .no-data-bars {
+      font-size: 11px; color: var(--text-light);
+      text-align: center; padding: 10px 0;
+      font-style: italic;
+    }
+
+    /* Meta tags */
+    .device-meta {
+      display: flex; flex-wrap: wrap;
+      gap: 5px; margin-bottom: 12px;
+    }
+    .meta-tag {
+      font-size: 10px; background: #F8FAFC;
+      border: 1px solid #E2E8F0; padding: 2px 7px;
+      border-radius: 4px; color: var(--text-light);
+    }
+    .meta-tag.warn { background: #FEF3C7; border-color: #FCD34D; color: #92400E; }
+    .meta-tag.crit { background: #FEE2E2; border-color: #FCA5A5; color: #991B1B; }
+
+    /* Card actions */
+    .card-actions {
+      display: flex; gap: 6px;
+      border-top: 1px solid #F1F5F9;
+      padding-top: 10px;
+    }
+    .act-btn {
+      flex: 1; padding: 6px 4px;
+      border: none; border-radius: 6px;
+      font-size: 10px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      letter-spacing: 0.2px;
+    }
+    .act-btn.events { background: #EFF6FF; color: #1D4ED8; }
+    .act-btn.events:hover { background: #1D4ED8; color: white; }
+    .act-btn.sw-on { background: #F5F3FF; color: #6D28D9; }
+    .act-btn.sw-on:hover { background: #9C27B0; color: white; }
+    .act-btn.sw-off { background: linear-gradient(135deg, #9C27B0, #6A1B9A); color: white; }
+    .act-btn.sw-off:hover { opacity: 0.85; }
+    .act-btn.shots { background: #F0FDF4; color: #166534; }
+    .act-btn.shots:hover { background: #166534; color: white; }
+
+    /* ── ALERTS PANEL ── */
+    .two-col { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+    @media (max-width: 1100px) { .two-col { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: white; border-radius: 12px;
+      box-shadow: var(--shadow-sm); padding: 20px;
+    }
+    .panel-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 16px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .panel-title {
+      font-size: 15px; font-weight: 700;
+      color: var(--text-dark); display: flex;
+      align-items: center; gap: 8px;
+    }
+    .panel-count {
+      background: var(--red); color: white;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 10px;
+    }
+    .panel-count.zero { background: #E5E7EB; color: var(--text-light); }
+
+    /* Alert items */
+    .alert-item {
+      display: flex; align-items: flex-start;
+      gap: 10px; padding: 10px; border-radius: 8px;
+      margin-bottom: 8px; border: 1px solid;
+      transition: all 0.2s;
+    }
+    .alert-item:hover { transform: translateX(3px); }
+    .alert-item.CRITICAL { background: #FFF5F5; border-color: #FCA5A5; }
+    .alert-item.WARNING { background: #FFFBEB; border-color: #FCD34D; }
+    .alert-item.INFO { background: #F0F9FF; border-color: #BAE6FD; }
+    .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .alert-body { flex: 1; min-width: 0; }
+    .alert-title {
+      font-size: 12px; font-weight: 700;
+      color: var(--text-dark); display: flex;
+      align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+    .alert-device {
+      font-size: 10px; background: white;
+      border: 1px solid var(--border);
+      padding: 1px 6px; border-radius: 4px;
+      color: var(--text-light); font-weight: 500;
+    }
+    .alert-detail { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+    .alert-meta {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-top: 6px;
+    }
+    .alert-time { font-size: 10px; color: var(--text-light); }
+    .btn-resolve {
+      background: none; border: 1px solid var(--border);
+      padding: 3px 8px; border-radius: 4px;
+      font-size: 10px; font-weight: 600;
+      cursor: pointer; color: var(--text-light);
+      transition: all 0.2s;
+    }
+    .btn-resolve:hover { background: var(--green); color: white; border-color: var(--green); }
+
+    /* Settings panel */
+    .setting-row {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 10px 0;
+      border-bottom: 1px solid #F8FAFC;
+    }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-key { font-size: 12px; color: var(--text-dark); font-weight: 500; }
+    .setting-desc { font-size: 10px; color: var(--text-light); margin-top: 2px; }
+    .setting-input {
+      width: 80px; padding: 4px 8px;
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 12px; text-align: center;
+      transition: all 0.2s;
+    }
+    .setting-input:focus { outline: none; border-color: var(--primary); }
+
+    /* Loading & Empty */
+    .loading-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--text-light);
+    }
+    .loading-spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #E5E7EB;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { text-align: center; padding: 40px; color: var(--text-light); font-size: 13px; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200; display: none;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white; border-radius: 14px;
+      width: 100%; max-width: 540px;
+      max-height: 80vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      padding: 20px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; background: white; z-index: 1;
+    }
+    .modal-title { font-size: 16px; font-weight: 700; }
+    .modal-close {
+      background: none; border: none; font-size: 20px;
+      cursor: pointer; color: var(--text-light);
+      width: 32px; height: 32px; display: flex;
+      align-items: center; justify-content: center;
+      border-radius: 6px; transition: background 0.2s;
+    }
+    .modal-close:hover { background: var(--bg); }
+    .modal-body { padding: 20px; }
+
+    /* SUPERWATCH modal */
+    .sw-modal-warning {
+      background: #FFF5F5; border: 1px solid #FCA5A5;
+      border-radius: 8px; padding: 12px; margin-bottom: 16px;
+      font-size: 13px; color: #B91C1C;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; display: block; }
+    .form-input {
+      width: 100%; padding: 9px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; transition: all 0.2s;
+    }
+    .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(74,144,226,0.1); }
+    .form-actions { display: flex; gap: 10px; margin-top: 16px; }
+
+    /* Events timeline in modal */
+    .event-timeline { }
+    .event-row {
+      display: flex; gap: 12px; padding: 10px 0;
+      border-bottom: 1px solid #F8FAFC;
+    }
+    .event-row:last-child { border-bottom: none; }
+    .event-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-top: 5px; flex-shrink: 0;
+    }
+    .event-dot.CRITICAL { background: var(--red); }
+    .event-dot.WARNING { background: var(--orange); }
+    .event-dot.INFO { background: var(--primary); }
+    .event-type { font-size: 12px; font-weight: 700; color: var(--text-dark); }
+    .event-data { font-size: 11px; color: var(--text-light); margin-top: 2px; font-family: monospace; }
+    .event-when { font-size: 10px; color: var(--text-light); margin-top: 3px; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--text-dark); color: white;
+      padding: 12px 20px; border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: var(--shadow-md);
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s; z-index: 999;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--green); }
+    .toast.error { background: var(--red); }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <a href="/dashboard-new.html" class="logo">
+    <div class="logo-icon">🏠</div>
+    <span>RentComPro</span>
+  </a>
+  <div class="topbar-right">
+    <div class="user-menu">
+      <div class="user-avatar" id="userInitial">BK</div>
+      <div>
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-role">Super Admin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <ul class="sidebar-menu">
+    <li class="menu-section" id="section-main">
+      <div class="section-header" onclick="toggleSection('section-main')">
+        <div class="section-label">MAIN</div>
+        <div class="section-toggle">▼</div>
+      </div>
+      <ul class="menu-items">
+        <li class="menu-item">
+          <a href="/dashboard-new.html" class="menu-link">
+            <span class="menu-icon">●</span>
+            <span class="menu-text">Dashboard</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-section" id="section-management">
+      <div class="section-header" onclick="toggleSection('section-management')">
+        <div class="section-label">MANAGEMENT</div>
+        <div class="section-toggle">▼</div>
+      </div>
+      <ul class="menu-items">
+        <li class="menu-item">
+          <a href="/manage-devices.html" class="menu-link">
+            <span class="menu-icon">●</span>
+            <span class="menu-text">Devices</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="/manage-clients.html" class="menu-link">
+            <span class="menu-icon">●</span>
+            <span class="menu-text">Clients</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="/rental-items.html" class="menu-link">
+            <span class="menu-icon">●</span>
+            <span class="menu-text">Rental Items</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-section" id="section-billing">
+      <div class="section-header" onclick="toggleSection('section-billing')">
+        <div class="section-label">BILLING</div>
+        <div class="section-toggle">▼</div>
+      </div>
+      <ul class="menu-items">
+        <li class="menu-item">
+          <a href="/invoices.html" class="menu-link">
+            <span class="menu-icon">●</span>
+            <span class="menu-text">Invoices</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="/item-master.html" class="menu-link">
+            <span class="menu-icon">●</span>
+            <span class="menu-text">Item Master</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-section" id="section-monitoring">
+      <div class="section-header" onclick="toggleSection('section-monitoring')">
+        <div class="section-label">MONITORING</div>
+        <div class="section-toggle">▼</div>
+      </div>
+      <ul class="menu-items">
+        <li class="menu-item">
+          <a href="/device-monitor.html" class="menu-link active">
+            <span class="menu-icon">●</span>
+            <span class="menu-text">Device Monitor</span>
+            <span class="menu-badge" id="sidebarAlertBadge" style="display:none">0</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="/reports.html" class="menu-link">
+            <span class="menu-icon">●</span>
+            <span class="menu-text">Reports</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-section" id="section-system">
+      <div class="section-header" onclick="toggleSection('section-system')">
+        <div class="section-label">SYSTEM</div>
+        <div class="section-toggle">▼</div>
+      </div>
+      <ul class="menu-items">
+        <li class="menu-item">
+          <a href="/settings.html" class="menu-link">
+            <span class="menu-icon">●</span>
+            <span class="menu-text">Settings</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="#" class="menu-link" onclick="logout(); return false;">
+            <span class="menu-icon">●</span>
+            <span class="menu-text">Logout</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🖥️ Device Monitor</h1>
+      <p class="page-subtitle" id="lastRefreshedText">Loading devices...</p>
+    </div>
+    <div class="header-actions">
+      <div class="refresh-indicator">
+        <div class="refresh-dot" id="refreshDot"></div>
+        <span id="refreshCountdown">Auto-refresh: 30s</span>
+      </div>
+      <button class="btn btn-outline" onclick="toggleAutoRefresh()">⏸ Pause</button>
+      <button class="btn btn-primary" onclick="loadMonitor()">🔄 Refresh</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-grid">
+    <div class="summary-card s-total" onclick="setFilter('all')">
+      <div class="summary-card-icon">💻</div>
+      <div class="summary-card-value" id="sumTotal">-</div>
+      <div class="summary-card-label">Total Devices</div>
+    </div>
+    <div class="summary-card s-online" onclick="setFilter('online')">
+      <div class="summary-card-icon">🟢</div>
+      <div class="summary-card-value" id="sumOnline">-</div>
+      <div class="summary-card-label">Online</div>
+    </div>
+    <div class="summary-card s-offline" onclick="setFilter('offline')">
+      <div class="summary-card-icon">🔴</div>
+      <div class="summary-card-value" id="sumOffline">-</div>
+      <div class="summary-card-label">Offline</div>
+    </div>
+    <div class="summary-card s-superwatch" onclick="setFilter('superwatch')">
+      <div class="summary-card-icon">👁️</div>
+      <div class="summary-card-value" id="sumSuperwatch">-</div>
+      <div class="summary-card-label">Superwatch</div>
+    </div>
+    <div class="summary-card s-alerts" onclick="setFilter('alerts')">
+      <div class="summary-card-icon">⚠️</div>
+      <div class="summary-card-value" id="sumAlerts">-</div>
+      <div class="summary-card-label">Alerts</div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">All</button>
+    <button class="filter-btn" id="filter-online" onclick="setFilter('online')">🟢 Online</button>
+    <button class="filter-btn" id="filter-offline" onclick="setFilter('offline')">🔴 Offline</button>
+    <button class="filter-btn" id="filter-superwatch" onclick="setFilter('superwatch')">👁️ Superwatch</button>
+    <button class="filter-btn" id="filter-alerts" onclick="setFilter('alerts')">⚠️ Has Alerts</button>
+  </div>
+
+  <!-- DEVICE GRID -->
+  <div id="deviceGrid" class="device-grid">
+    <div class="loading-state" style="grid-column:1/-1">
+      <div class="loading-spinner"></div>
+      <div>Loading devices...</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM TWO COLS: Alerts + Quick Settings -->
+  <div class="two-col">
+
+    <!-- ALERTS PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          ⚠️ Unresolved Alerts
+          <span class="panel-count" id="alertCountBadge">0</span>
+        </div>
+        <button class="btn btn-outline" style="font-size:12px;padding:6px 12px" onclick="loadAlerts()">🔄 Refresh</button>
+      </div>
+      <div id="alertsList">
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <div>Loading alerts...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK SETTINGS PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">⚙️ Tracking Settings</div>
+        <button class="btn btn-primary" style="font-size:12px;padding:6px 12px" onclick="saveSettings()">💾 Save</button>
+      </div>
+      <div id="settingsPanel">
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- SUPERWATCH MODAL -->
+<div class="modal-overlay" id="swModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="swModalTitle">Activate SUPERWATCH</div>
+      <button class="modal-close" onclick="closeModal('swModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="sw-modal-warning" id="swModalWarning">
+        ⚠️ SUPERWATCH mode will increase data collection. Device will report every 30 seconds and take screenshots every 5 minutes.
+      </div>
+      <div class="form-group" id="swReasonGroup">
+        <label class="form-label">Reason for activation *</label>
+        <input type="text" class="form-input" id="swReason" placeholder="e.g. Payment overdue, Suspicious activity...">
+      </div>
+      <input type="hidden" id="swDeviceId">
+      <input type="hidden" id="swAction">
+      <div class="form-actions">
+        <button class="btn btn-outline" style="flex:1" onclick="closeModal('swModal')">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;background:#9C27B0" onclick="confirmModeSwitch()">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENTS MODAL -->
+<div class="modal-overlay" id="eventsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="eventsModalTitle">Device Events</div>
+      <button class="modal-close" onclick="closeModal('eventsModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="eventsTimeline">
+        <div class="loading-state"><div class="loading-spinner"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
+  let token = '';
+  let allDevices = [];
+  let currentFilter = 'all';
+  let autoRefresh = true;
+  let refreshTimer = null;
+  let refreshInterval = 30;
+  let countdown = 30;
+  let editableSettings = [];
+
+  // ── INIT ──────────────────────────────────────────
+  function init() {
+    token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/index.html'; return; }
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    document.getElementById('userName').textContent = user.email?.split('@')[0] || 'Admin';
+    document.getElementById('userInitial').textContent = (user.email?.[0] || 'A').toUpperCase();
+    restoreStates();
+    loadMonitor();
+    loadAlerts();
+    loadSettings();
+    startAutoRefresh();
+  }
+
+  // ── LOAD MONITOR ─────────────────────────────────
+  async function loadMonitor() {
+    try {
+      const res = await fetch(`${API}/api/devices/monitor`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      allDevices = data.data || [];
+      updateSummary(data.summary);
+      renderDevices();
+      const now = new Date().toLocaleTimeString('en-IN');
+      document.getElementById('lastRefreshedText').textContent = `Last updated: ${now} · ${allDevices.length} devices`;
+    } catch (err) {
+      console.error(err);
+      document.getElementById('deviceGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1">❌ Failed to load devices. ${err.message}</div>`;
+    }
+  }
+
+  // ── UPDATE SUMMARY ────────────────────────────────
+  function updateSummary(summary) {
+    if (!summary) return;
+    document.getElementById('sumTotal').textContent = summary.total || 0;
+    document.getElementById('sumOnline').textContent = summary.online || 0;
+    document.getElementById('sumOffline').textContent = (summary.offline || 0) + (summary.neverSeen || 0);
+    document.getElementById('sumSuperwatch').textContent = summary.superwatch || 0;
+    document.getElementById('sumAlerts').textContent = summary.alerts || 0;
+
+    // Sidebar badge
+    const badge = document.getElementById('sidebarAlertBadge');
+    if (summary.alerts > 0) {
+      badge.textContent = summary.alerts;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // ── RENDER DEVICES ────────────────────────────────
+  function renderDevices() {
+    const grid = document.getElementById('deviceGrid');
+    let devices = [...allDevices];
+
+    // Apply filter
+    if (currentFilter === 'online') devices = devices.filter(d => d.online_status === 'ONLINE');
+    else if (currentFilter === 'offline') devices = devices.filter(d => ['OFFLINE','LONG_OFFLINE','NEVER_SEEN'].includes(d.online_status));
+    else if (currentFilter === 'superwatch') devices = devices.filter(d => d.tracking_mode === 'SUPERWATCH');
+    else if (currentFilter === 'alerts') devices = devices.filter(d => d.unresolved_alerts > 0);
+
+    if (devices.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">No devices found for this filter.</div>`;
+      return;
+    }
+
+    // Sort: SUPERWATCH first, then ONLINE, then OFFLINE, then NEVER_SEEN
+    devices.sort((a, b) => {
+      const order = { SUPERWATCH: 0, ONLINE: 1, RECENTLY_ONLINE: 2, OFFLINE: 3, LONG_OFFLINE: 4, NEVER_SEEN: 5 };
+      const aKey = a.tracking_mode === 'SUPERWATCH' ? 'SUPERWATCH' : a.online_status;
+      const bKey = b.tracking_mode === 'SUPERWATCH' ? 'SUPERWATCH' : b.online_status;
+      return (order[aKey] ?? 9) - (order[bKey] ?? 9);
+    });
+
+    grid.innerHTML = devices.map(d => renderDeviceCard(d)).join('');
+  }
+
+  // ── RENDER SINGLE DEVICE CARD ─────────────────────
+  function renderDeviceCard(d) {
+    const isSW = d.tracking_mode === 'SUPERWATCH';
+    const statusKey = isSW ? 'superwatch' : statusClass(d.online_status);
+    const hasData = d.cpu_usage !== null && d.cpu_usage !== undefined;
+
+    // SUPERWATCH banner
+    const swBanner = isSW ? `
+      <div class="superwatch-banner">
+        <div class="sw-blink"></div>
+        👁️ SUPERWATCH ACTIVE
+        ${d.superwatch_reason ? `<span class="sw-reason">· ${d.superwatch_reason}</span>` : ''}
+      </div>` : '';
+
+    // Resource bars
+    const bars = hasData ? `
+      <div class="resource-bars">
+        ${resourceBar('CPU', d.cpu_usage)}
+        ${resourceBar('RAM', d.ram_usage)}
+        ${resourceBar('DSK', d.disk_usage)}
+      </div>` : `<div class="no-data-bars">No stats yet — agent not connected</div>`;
+
+    // Meta tags
+    const metaTags = [];
+    if (d.logged_in_user) metaTags.push(`<span class="meta-tag">👤 ${d.logged_in_user}</span>`);
+    if (d.ip_address) metaTags.push(`<span class="meta-tag">🌐 ${d.ip_address}</span>`);
+    if (d.connection_type) metaTags.push(`<span class="meta-tag">📡 ${d.connection_type}</span>`);
+    if (d.uptime_minutes) metaTags.push(`<span class="meta-tag">⏱ ${uptimeStr(d.uptime_minutes)}</span>`);
+    if (d.unresolved_alerts > 0) metaTags.push(`<span class="meta-tag ${d.unresolved_alerts > 2 ? 'crit' : 'warn'}">⚠️ ${d.unresolved_alerts} alert${d.unresolved_alerts > 1 ? 's' : ''}</span>`);
+    if (d.latest_critical_event) metaTags.push(`<span class="meta-tag crit">🚨 ${d.latest_critical_event}</span>`);
+
+    // Actions
+    const modeBtn = isSW
+      ? `<button class="act-btn sw-off" onclick="openSwModal('${d.id}','off','${escHtml(d.serial_number)}')">⏹ Normal Mode</button>`
+      : `<button class="act-btn sw-on" onclick="openSwModal('${d.id}','on','${escHtml(d.serial_number)}')">👁️ SUPERWATCH</button>`;
+
+    const screenshotBtn = isSW
+      ? `<button class="act-btn shots" onclick="viewScreenshots('${d.id}')">📸 Shots</button>`
+      : '';
+
+    // Offline time
+    const offlineInfo = d.offline_minutes
+      ? ` · Offline ${offlineStr(d.offline_minutes)}`
+      : '';
+
+    return `
+    <div class="device-card c-${statusKey}" id="card-${d.id}">
+      ${swBanner}
+      <div class="device-card-top">
+        <div class="device-title">
+          <div class="device-name">${escHtml(d.serial_number)}</div>
+          <div class="device-serial">${escHtml(d.computer_name || d.device_type || 'Desktop')}${offlineInfo}</div>
+        </div>
+        <span class="status-pill ${statusKey}">${statusLabel(d.online_status, isSW)}</span>
+      </div>
+      <div class="device-client">
+        ${d.company_name
+          ? `🏢 <strong>${escHtml(d.company_name)}</strong> · ${escHtml(d.owner_name || '')}`
+          : `<span class="no-client">Unassigned</span>`}
+      </div>
+      ${bars}
+      ${metaTags.length > 0 ? `<div class="device-meta">${metaTags.join('')}</div>` : ''}
+      <div class="card-actions">
+        <button class="act-btn events" onclick="viewEvents('${d.id}','${escHtml(d.serial_number)}')">📋 Events</button>
+        ${modeBtn}
+        ${screenshotBtn}
+      </div>
+    </div>`;
+  }
+
+  function resourceBar(label, val) {
+    const pct = Math.min(100, Math.round(val || 0));
+    const cls = pct < 60 ? 'low' : pct < 80 ? 'med' : 'high';
+    return `
+    <div class="resource-row">
+      <span class="res-label">${label}</span>
+      <div class="bar-track">
+        <div class="bar-fill ${cls}" style="width:${pct}%"></div>
+      </div>
+      <span class="res-val">${pct}%</span>
+    </div>`;
+  }
+
+  // ── LOAD ALERTS ───────────────────────────────────
+  async function loadAlerts() {
+    try {
+      const res = await fetch(`${API}/api/devices/alerts`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      renderAlerts(data.data || []);
+      const badge = document.getElementById('alertCountBadge');
+      badge.textContent = data.total || 0;
+      badge.className = `panel-count ${data.total === 0 ? 'zero' : ''}`;
+    } catch (err) {
+      document.getElementById('alertsList').innerHTML = `<div class="empty-state">Failed to load alerts</div>`;
+    }
+  }
+
+  function renderAlerts(alerts) {
+    const el = document.getElementById('alertsList');
+    if (alerts.length === 0) {
+      el.innerHTML = `<div class="empty-state">✅ No unresolved alerts</div>`;
+      return;
+    }
+    const icons = { CRITICAL: '🚨', WARNING: '⚠️', INFO: 'ℹ️' };
+    const labels = {
+      MAC_CHANGE: 'MAC Address Changed', IP_CHANGE: 'IP Changed',
+      USER_CHANGE: 'User Changed', RESTART: 'Repeated Restarts',
+      ABRUPT_SHUTDOWN: 'Abrupt Shutdown', PAYMENT_OVERDUE: 'Payment Overdue',
+      OFFLINE_SPIKE: 'Offline During Business Hours', NIGHT_ACTIVITY: 'Night Activity',
+      USB_CONNECT: 'USB Connected', SUPERWATCH_ON: 'SUPERWATCH Activated',
+      SUPERWATCH_OFF: 'SUPERWATCH Deactivated', LOCATION_CHANGE: 'Location Changed'
+    };
+    el.innerHTML = alerts.slice(0, 20).map(a => {
+      const device = a.devices;
+      const serial = device?.serial_number || 'Unknown';
+      const client = device?.clients?.company_name || '';
+      const detail = formatEventData(a.event_type, a.event_data);
+      return `
+      <div class="alert-item ${a.severity}">
+        <span class="alert-icon">${icons[a.severity] || '●'}</span>
+        <div class="alert-body">
+          <div class="alert-title">
+            ${labels[a.event_type] || a.event_type}
+            <span class="alert-device">${escHtml(serial)}${client ? ' · ' + escHtml(client) : ''}</span>
+          </div>
+          ${detail ? `<div class="alert-detail">${detail}</div>` : ''}
+          <div class="alert-meta">
+            <span class="alert-time">${timeAgo(a.created_at)}</span>
+            <button class="btn-resolve" onclick="resolveAlert('${a.id}', this)">✓ Resolve</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    if (alerts.length > 20) {
+      el.innerHTML += `<div class="empty-state" style="padding:10px">... and ${alerts.length - 20} more alerts</div>`;
+    }
+  }
+
+  async function resolveAlert(alertId, btn) {
+    btn.disabled = true; btn.textContent = '...';
+    try {
+      const res = await fetch(`${API}/api/devices/alerts/${alertId}/resolve`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resolveNote: 'Resolved from dashboard' })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      btn.closest('.alert-item').remove();
+      showToast('Alert resolved', 'success');
+      loadAlerts();
+      loadMonitor();
+    } catch (err) {
+      btn.disabled = false; btn.textContent = '✓ Resolve';
+      showToast('Failed to resolve: ' + err.message, 'error');
+    }
+  }
+
+  // ── LOAD SETTINGS ─────────────────────────────────
+  async function loadSettings() {
+    try {
+      const res = await fetch(`${API}/api/settings?category=SUPERWATCH`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      const settings = data.data?.SUPERWATCH || [];
+      editableSettings = settings;
+      renderSettings(settings);
+    } catch (err) {
+      document.getElementById('settingsPanel').innerHTML = `<div class="empty-state">Failed to load settings</div>`;
+    }
+  }
+
+  function renderSettings(settings) {
+    const el = document.getElementById('settingsPanel');
+    if (settings.length === 0) {
+      el.innerHTML = `<div class="empty-state">No settings found</div>`;
+      return;
+    }
+    el.innerHTML = settings.map(s => `
+      <div class="setting-row">
+        <div>
+          <div class="setting-key">${s.label}</div>
+          ${s.min_value ? `<div class="setting-desc">Range: ${s.min_value}–${s.max_value}</div>` : ''}
+        </div>
+        <input type="${s.setting_type === 'BOOLEAN' ? 'text' : 'number'}"
+          class="setting-input"
+          id="setting-${s.setting_key}"
+          value="${escHtml(s.setting_value)}"
+          ${s.min_value ? `min="${s.min_value}" max="${s.max_value}"` : ''}>
+      </div>
+    `).join('');
+  }
+
+  async function saveSettings() {
+    let saved = 0, failed = 0;
+    for (const s of editableSettings) {
+      const input = document.getElementById(`setting-${s.setting_key}`);
+      if (!input) continue;
+      const newVal = input.value.trim();
+      if (newVal === s.setting_value) continue; // no change
+      try {
+        const res = await fetch(`${API}/api/settings/${s.setting_key}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ value: newVal })
+        });
+        const data = await res.json();
+        if (data.success) saved++;
+        else { failed++; }
+      } catch { failed++; }
+    }
+    if (saved > 0) showToast(`${saved} setting${saved > 1 ? 's' : ''} saved`, 'success');
+    if (failed > 0) showToast(`${failed} setting${failed > 1 ? 's' : ''} failed`, 'error');
+    if (saved === 0 && failed === 0) showToast('No changes to save', '');
+    loadSettings();
+  }
+
+  // ── SUPERWATCH MODAL ──────────────────────────────
+  function openSwModal(deviceId, action, serial) {
+    document.getElementById('swDeviceId').value = deviceId;
+    document.getElementById('swAction').value = action;
+    const isOn = action === 'on';
+    document.getElementById('swModalTitle').textContent = isOn
+      ? `Activate SUPERWATCH — ${serial}`
+      : `Deactivate SUPERWATCH — ${serial}`;
+    document.getElementById('swModalWarning').textContent = isOn
+      ? '⚠️ SUPERWATCH will increase monitoring. Device reports every 30s and takes screenshots every 5 min.'
+      : 'ℹ️ Device will return to NORMAL mode. Reporting will reduce to every 5 minutes.';
+    document.getElementById('swReasonGroup').style.display = isOn ? '' : 'none';
+    document.getElementById('swReason').value = '';
+    document.getElementById('swModal').classList.add('open');
+  }
+
+  async function confirmModeSwitch() {
+    const deviceId = document.getElementById('swDeviceId').value;
+    const action = document.getElementById('swAction').value;
+    const mode = action === 'on' ? 'SUPERWATCH' : 'NORMAL';
+    const reason = document.getElementById('swReason').value.trim();
+    if (mode === 'SUPERWATCH' && !reason) {
+      showToast('Please enter a reason', 'error'); return;
+    }
+    try {
+      const res = await fetch(`${API}/api/devices/${deviceId}/mode`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode, reason })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      closeModal('swModal');
+      showToast(`Device switched to ${mode} mode`, 'success');
+      loadMonitor();
+    } catch (err) {
+      showToast('Failed: ' + err.message, 'error');
+    }
+  }
+
+  // ── EVENTS MODAL ──────────────────────────────────
+  async function viewEvents(deviceId, serial) {
+    document.getElementById('eventsModalTitle').textContent = `Events — ${serial}`;
+    document.getElementById('eventsTimeline').innerHTML = `<div class="loading-state"><div class="loading-spinner"></div></div>`;
+    document.getElementById('eventsModal').classList.add('open');
+    try {
+      const res = await fetch(`${API}/api/devices/${deviceId}/events?limit=30`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      const events = data.data || [];
+      if (events.length === 0) {
+        document.getElementById('eventsTimeline').innerHTML = `<div class="empty-state">No events recorded</div>`;
+        return;
+      }
+      const labels = {
+        MAC_CHANGE:'MAC Address Changed', IP_CHANGE:'IP Changed',
+        USER_CHANGE:'User Changed', RESTART:'Restarts',
+        ABRUPT_SHUTDOWN:'Abrupt Shutdown', PAYMENT_OVERDUE:'Payment Overdue',
+        OFFLINE_SPIKE:'Offline Spike', NIGHT_ACTIVITY:'Night Activity',
+        USB_CONNECT:'USB Connected', SUPERWATCH_ON:'SUPERWATCH ON',
+        SUPERWATCH_OFF:'SUPERWATCH OFF', LOCATION_CHANGE:'Location Changed'
+      };
+      document.getElementById('eventsTimeline').innerHTML = `
+        <div class="event-timeline">
+          ${events.map(e => `
+            <div class="event-row">
+              <div class="event-dot ${e.severity}"></div>
+              <div style="flex:1">
+                <div class="event-type">${labels[e.event_type] || e.event_type}
+                  <span style="font-size:10px;font-weight:400;color:${e.severity==='CRITICAL'?'#B91C1C':e.severity==='WARNING'?'#B45309':'#1D4ED8'};background:${e.severity==='CRITICAL'?'#FEE2E2':e.severity==='WARNING'?'#FEF3C7':'#EFF6FF'};padding:1px 6px;border-radius:4px;margin-left:4px">${e.severity}</span>
+                  ${e.is_resolved ? '<span style="font-size:10px;color:#15803D;background:#DCFCE7;padding:1px 6px;border-radius:4px;margin-left:4px">✓ Resolved</span>' : ''}
+                </div>
+                ${e.event_data ? `<div class="event-data">${JSON.stringify(e.event_data)}</div>` : ''}
+                <div class="event-when">${timeAgo(e.created_at)}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>`;
+    } catch (err) {
+      document.getElementById('eventsTimeline').innerHTML = `<div class="empty-state">Failed: ${err.message}</div>`;
+    }
+  }
+
+  async function viewScreenshots(deviceId) {
+    showToast('Screenshots feature — opening soon', '');
+  }
+
+  // ── FILTER ────────────────────────────────────────
+  function setFilter(f) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`filter-${f}`)?.classList.add('active');
+    document.querySelectorAll('.summary-card').forEach(c => c.classList.remove('active-filter'));
+    renderDevices();
+  }
+
+  // ── AUTO REFRESH ──────────────────────────────────
+  function startAutoRefresh() {
+    clearInterval(refreshTimer);
+    countdown = refreshInterval;
+    refreshTimer = setInterval(() => {
+      if (!autoRefresh) return;
+      countdown--;
+      document.getElementById('refreshCountdown').textContent = `Auto-refresh: ${countdown}s`;
+      if (countdown <= 0) {
+        countdown = refreshInterval;
+        loadMonitor();
+        loadAlerts();
+      }
+    }, 1000);
+  }
+
+  function toggleAutoRefresh() {
+    autoRefresh = !autoRefresh;
+    const dot = document.getElementById('refreshDot');
+    const btn = document.querySelector('button[onclick="toggleAutoRefresh()"]');
+    if (autoRefresh) {
+      dot.classList.remove('paused');
+      btn.textContent = '⏸ Pause';
+    } else {
+      dot.classList.add('paused');
+      btn.textContent = '▶ Resume';
+    }
+  }
+
+  // ── HELPERS ───────────────────────────────────────
+  function statusClass(s) {
+    if (s === 'ONLINE') return 'online';
+    if (s === 'RECENTLY_ONLINE') return 'recently';
+    if (s === 'LONG_OFFLINE') return 'offline';
+    if (s === 'OFFLINE') return 'offline';
+    return 'never-seen';
+  }
+
+  function statusLabel(s, isSW) {
+    if (isSW) return '👁️ SUPERWATCH';
+    if (s === 'ONLINE') return '● Online';
+    if (s === 'RECENTLY_ONLINE') return '● Recently Online';
+    if (s === 'OFFLINE') return '● Offline';
+    if (s === 'LONG_OFFLINE') return '● Long Offline';
+    return '● Never Seen';
+  }
+
+  function uptimeStr(mins) {
+    if (!mins) return '';
+    if (mins < 60) return `${mins}m uptime`;
+    if (mins < 1440) return `${Math.floor(mins/60)}h uptime`;
+    return `${Math.floor(mins/1440)}d uptime`;
+  }
+
+  function offlineStr(mins) {
+    if (mins < 60) return `${Math.round(mins)}m`;
+    if (mins < 1440) return `${Math.floor(mins/60)}h ${Math.round(mins%60)}m`;
+    return `${Math.floor(mins/1440)}d`;
+  }
+
+  function timeAgo(ts) {
+    if (!ts) return '';
+    const diff = (Date.now() - new Date(ts)) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+    return `${Math.floor(diff/86400)}d ago`;
+  }
+
+  function formatEventData(type, data) {
+    if (!data) return '';
+    if (type === 'MAC_CHANGE') return `${data.old_mac} → ${data.new_mac}`;
+    if (type === 'IP_CHANGE') return `${data.old_ip} → ${data.new_ip}`;
+    if (type === 'USER_CHANGE') return `${data.old_user} → ${data.new_user}`;
+    if (type === 'RESTART') return `${data.restart_count_24h} restarts in 24h`;
+    if (type === 'PAYMENT_OVERDUE') return `${data.overdue_days} days overdue`;
+    return '';
+  }
+
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function logout() {
+    if (confirm('Logout karna chahte hain?')) {
+      localStorage.clear();
+      window.location.href = '/index.html';
+    }
+  }
+
+  // ── SIDEBAR STATE ─────────────────────────────────
+  function toggleSidebar() {
+    const s = document.getElementById('sidebar');
+    s.classList.toggle('collapsed');
+    localStorage.setItem('sidebarCollapsed', s.classList.contains('collapsed'));
+  }
+  function toggleSection(id) {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar.classList.contains('collapsed')) return;
+    const sec = document.getElementById(id);
+    sec.classList.toggle('collapsed');
+  }
+  function restoreStates() {
+    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+      document.getElementById('sidebar').classList.add('collapsed');
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
