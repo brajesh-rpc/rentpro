@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payments - RentComPro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px 30px; color: white;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .navbar h1 { font-size: 24px; }
+    .nav-links a {
+      color: white; text-decoration: none;
+      padding: 8px 15px; border-radius: 5px;
+      margin-left: 10px; transition: background 0.3s;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,0.2); }
+    .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+    .page-header {
+      background: white; border-radius: 12px;
+      padding: 24px 30px; margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .page-header h2 { font-size: 22px; color: #2C3E50; }
+    .page-header p { font-size: 14px; color: #7F8C9A; margin-top: 4px; }
+    .btn-back {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white; border: none; padding: 10px 20px;
+      border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; display: inline-block;
+    }
+    .redirect-note {
+      background: white; border-radius: 12px;
+      padding: 60px 30px; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .redirect-note .icon { font-size: 56px; margin-bottom: 16px; }
+    .redirect-note h3 { font-size: 22px; color: #2C3E50; margin-bottom: 10px; }
+    .redirect-note p { font-size: 14px; color: #7F8C9A; margin-bottom: 24px; }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white; border: none; padding: 12px 28px;
+      border-radius: 8px; font-size: 15px; font-weight: 600;
+      cursor: pointer; text-decoration: none; display: inline-block;
+      margin: 6px;
+    }
+    .btn-secondary {
+      background: white; color: #667eea;
+      border: 2px solid #667eea; padding: 12px 28px;
+      border-radius: 8px; font-size: 15px; font-weight: 600;
+      cursor: pointer; text-decoration: none; display: inline-block;
+      margin: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <h1>💰 Payments</h1>
+  <div class="nav-links">
+    <a href="/dashboard-new.html">🏠 Dashboard</a>
+    <a href="/invoices.html">🧾 Invoices</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h2>💰 Payments</h2>
+      <p>Track and manage rental payments</p>
+    </div>
+    <a href="/dashboard-new.html" class="btn-back">← Dashboard</a>
+  </div>
+
+  <div class="redirect-note">
+    <div class="icon">💰</div>
+    <h3>Payments are managed through Invoices</h3>
+    <p>Payment collection, marking as paid, and due tracking is done through the Invoice system. Open any invoice to mark it as paid.</p>
+    <a href="/invoices.html" class="btn-primary">🧾 Go to Invoices</a>
+    <a href="/dashboard-new.html" class="btn-secondary">🏠 Dashboard</a>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem('token');
+  if (!token) window.location.href = '/index.html';
+  function logout() {
+    if (confirm('Logout karna chahte hain?')) {
+      localStorage.clear();
+      window.location.href = '/index.html';
+    }
+  }
+</script>
+</body>
+</html>

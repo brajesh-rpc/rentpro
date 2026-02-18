@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maintenance - RentComPro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px 30px; color: white;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .navbar h1 { font-size: 24px; }
+    .nav-links a {
+      color: white; text-decoration: none;
+      padding: 8px 15px; border-radius: 5px;
+      margin-left: 10px; transition: background 0.3s;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,0.2); }
+    .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+    .page-header {
+      background: white; border-radius: 12px;
+      padding: 24px 30px; margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .page-header h2 { font-size: 22px; color: #2C3E50; }
+    .page-header p { font-size: 14px; color: #7F8C9A; margin-top: 4px; }
+    .coming-soon {
+      background: white; border-radius: 12px;
+      padding: 80px 30px; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .coming-soon-icon { font-size: 64px; margin-bottom: 20px; }
+    .coming-soon h3 { font-size: 24px; color: #2C3E50; margin-bottom: 10px; }
+    .coming-soon p { font-size: 15px; color: #7F8C9A; max-width: 400px; margin: 0 auto 24px; }
+    .planned-features {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin-top: 32px; text-align: left;
+    }
+    .feature-card {
+      background: #F8FAFC; border: 1px solid #E2E8F0;
+      border-radius: 10px; padding: 16px;
+    }
+    .feature-card h4 { font-size: 14px; color: #2C3E50; margin-bottom: 6px; }
+    .feature-card p { font-size: 12px; color: #7F8C9A; }
+    .feature-icon { font-size: 24px; margin-bottom: 8px; }
+    .phase-badge {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 10px;
+      background: #F0FDF4; color: #166534; margin-top: 6px;
+    }
+    .btn-back {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white; border: none; padding: 10px 20px;
+      border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <h1>🔧 Maintenance</h1>
+  <div class="nav-links">
+    <a href="/dashboard-new.html">🏠 Dashboard</a>
+    <a href="/device-monitor.html">🖥️ Monitor</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h2>🔧 Device Maintenance</h2>
+      <p>Schedule maintenance, track repairs, hardware health history</p>
+    </div>
+    <a href="/dashboard-new.html" class="btn-back">← Dashboard</a>
+  </div>
+
+  <div class="coming-soon">
+    <div class="coming-soon-icon">🔧</div>
+    <h3>Maintenance — Coming in Phase 3</h3>
+    <p>Device maintenance scheduling and repair tracking is planned for Phase 3. This will help you track hardware issues and plan preventive maintenance.</p>
+
+    <div class="planned-features">
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <h4>Maintenance Schedule</h4>
+        <p>Plan regular maintenance visits, set reminders per device</p>
+        <span class="phase-badge">Phase 3</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛠️</div>
+        <h4>Repair Log</h4>
+        <p>Track repairs, parts replaced, technician notes per device</p>
+        <span class="phase-badge">Phase 3</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌡️</div>
+        <h4>Hardware Health</h4>
+        <p>CPU/HDD temperature trends, failure prediction alerts</p>
+        <span class="phase-badge">Phase 3</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <h4>Parts Inventory</h4>
+        <p>Track spare parts stock — RAM, HDD, cables, peripherals</p>
+        <span class="phase-badge">Phase 3</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem('token');
+  if (!token) window.location.href = '/index.html';
+  function logout() {
+    if (confirm('Logout karna chahte hain?')) {
+      localStorage.clear();
+      window.location.href = '/index.html';
+    }
+  }
+</script>
+</body>
+</html>
