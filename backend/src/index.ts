@@ -6,8 +6,21 @@ import { loginHandler } from './auth/login';
 import { logoutHandler } from './auth/logout';
 import { authMiddleware, requireRole } from './middleware/auth';
 import { getDashboardStats, getRecentActivity } from './dashboard/stats';
-import { receiveDeviceStats } from './devices/stats';
 import { addDevice, getDevices } from './devices/management';
+import {
+  receiveDeviceStats,
+  getDeviceMonitor,
+  switchDeviceMode,
+  receiveDeviceEvent,
+  getAlerts,
+  resolveAlert,
+  receiveScreenshot,
+  getScreenshots,
+  getScreenshot,
+  getSettings,
+  updateSetting,
+  getDeviceEvents
+} from './devices/monitoring';
 import { registerClient, getClients, getClient, updateClient, deleteClient } from './clients/management';
 import { addRentalItem, getClientRentalItems, getRentalItemHistory, removeRentalItem } from './rental-items/management';
 import { getLastInvoice, createInvoice, updateInvoice, getInvoices, getInvoice, markInvoicePaid, getClientLastInvoice } from './invoices/management';
@@ -72,12 +85,31 @@ app.get('/api/test-connection', async (c) => {
 // Login endpoint
 app.post('/api/auth/login', loginHandler);
 
-// Device Stats endpoint (Public - no auth required for agents)
+// ============================================
+// DEVICE AGENT ROUTES (Public - no auth, agents use deviceToken)
+// ============================================
 app.post('/api/devices/stats', receiveDeviceStats);
+app.post('/api/devices/event', receiveDeviceEvent);
+app.post('/api/devices/screenshot', receiveScreenshot);
 
-// Device Management (Protected - Admin only)
+// ============================================
+// DEVICE MANAGEMENT (Protected - Admin only)
+// ============================================
 app.post('/api/devices', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), addDevice);
 app.get('/api/devices', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getDevices);
+app.get('/api/devices/monitor', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getDeviceMonitor);
+app.get('/api/devices/alerts', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getAlerts);
+app.put('/api/devices/alerts/:id/resolve', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), resolveAlert);
+app.put('/api/devices/:id/mode', authMiddleware, requireRole('SUPER_ADMIN'), switchDeviceMode);
+app.get('/api/devices/:id/events', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getDeviceEvents);
+app.get('/api/devices/:id/screenshots', authMiddleware, requireRole('SUPER_ADMIN'), getScreenshots);
+app.get('/api/devices/:id/screenshot/:screenshotId', authMiddleware, requireRole('SUPER_ADMIN'), getScreenshot);
+
+// ============================================
+// SYSTEM SETTINGS (Protected - Super Admin only)
+// ============================================
+app.get('/api/settings', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getSettings);
+app.put('/api/settings/:key', authMiddleware, requireRole('SUPER_ADMIN'), updateSetting);
 
 // Client Management (Protected - Admin only)
 app.post('/api/clients', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), registerClient);
