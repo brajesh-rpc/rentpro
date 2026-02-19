@@ -6,7 +6,7 @@ import { loginHandler } from './auth/login';
 import { logoutHandler } from './auth/logout';
 import { authMiddleware, requireRole } from './middleware/auth';
 import { getDashboardStats, getRecentActivity } from './dashboard/stats';
-import { addDevice, getDevices } from './devices/management';
+import { addDevice, getDevices, getDevice, updateDevice, deleteDevice } from './devices/management';
 import {
   receiveDeviceStats,
   getDeviceMonitor,
@@ -101,6 +101,9 @@ app.get('/api/devices/monitor', authMiddleware, requireRole('SUPER_ADMIN', 'STAF
 app.get('/api/devices/alerts', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getAlerts);
 app.put('/api/devices/alerts/:id/resolve', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), resolveAlert);
 app.put('/api/devices/:id/mode', authMiddleware, requireRole('SUPER_ADMIN'), switchDeviceMode);
+app.get('/api/devices/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getDevice);
+app.put('/api/devices/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), updateDevice);
+app.delete('/api/devices/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), deleteDevice);
 app.get('/api/devices/:id/events', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getDeviceEvents);
 app.get('/api/devices/:id/screenshots', authMiddleware, requireRole('SUPER_ADMIN'), getScreenshots);
 app.get('/api/devices/:id/screenshot/:screenshotId', authMiddleware, requireRole('SUPER_ADMIN'), getScreenshot);
