@@ -251,6 +251,36 @@
     </div>
   </div>
 
+  <!-- ASSIGN MODAL -->
+  <div class="modal-overlay" id="assignModal">
+    <div class="modal" style="max-width:400px;">
+      <h3>📌 Device Assign Karen</h3>
+      <div class="form-group full" style="margin-bottom:15px;">
+        <label>Client Select Karen *</label>
+        <select id="assign_client_id" style="padding:10px 12px;border:2px solid #e5e7eb;border-radius:8px;font-size:14px;">
+          <option value="">-- Client Select Karen --</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeAssignModal()">Cancel</button>
+        <button class="btn btn-success" onclick="confirmAssign()">📌 Assign</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNASSIGN CONFIRM -->
+  <div class="confirm-overlay" id="unassignConfirm">
+    <div class="confirm-box">
+      <div class="icon">🔓</div>
+      <h3>Device Unassign Karen?</h3>
+      <p id="unassignDeviceName">Ye device client se unassign ho jayega.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-cancel" onclick="closeUnassignConfirm()">Cancel</button>
+        <button class="btn btn-warning" onclick="confirmUnassign()">🔓 Unassign</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
@@ -370,8 +400,11 @@
             <div class="device-rent">₹${d.monthly_rent || 0}/month</div>
             <div class="device-actions">
               <button class="btn btn-edit btn-sm" onclick="openEditModal('${d.id}')">✏️ Edit</button>
+              ${d.status === 'AVAILABLE' ? `<button class="btn btn-success btn-sm" onclick="openAssignModal('${d.id}')">📌 Assign</button>` : ''}
+              ${d.status === 'DEPLOYED' ? `<button class="btn btn-warning btn-sm" onclick="openUnassignConfirm('${d.id}')">🔓 Unassign</button>` : ''}
               <button class="btn btn-danger btn-sm" onclick="deleteDevice('${d.id}','${(d.brand||'') + ' ' + (d.model||'')}')">🗑️ Delete</button>
             </div>
+            ${d.status === 'DEPLOYED' && d.client_name ? `<div style="margin-top:8px;font-size:12px;color:#3b82f6;font-weight:600;background:#eff6ff;padding:6px 10px;border-radius:6px;">👤 Assigned: ${d.client_name}</div>` : ''}
           </div>`;
       }).join('');
     }
@@ -492,11 +525,90 @@
       } catch { showToast('Network error!', 'error'); }
     }
 
+    // ── ASSIGN ────────────────────────────────────────
+    let assigningDeviceId = null;
+    let allClients = [];
+
+    async function loadClients() {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`${API_URL}/api/clients`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) allClients = data.data;
+      } catch {}
+    }
+
+    function openAssignModal(deviceId) {
+      assigningDeviceId = deviceId;
+      const sel = document.getElementById('assign_client_id');
+      sel.innerHTML = '<option value="">-- Client Select Karen --</option>';
+      allClients.forEach(c => {
+        sel.innerHTML += `<option value="${c.id}">${c.company_name || c.contact_person}</option>`;
+      });
+      document.getElementById('assignModal').classList.add('active');
+    }
+
+    function closeAssignModal() {
+      document.getElementById('assignModal').classList.remove('active');
+      assigningDeviceId = null;
+    }
+
+    async function confirmAssign() {
+      const clientId = document.getElementById('assign_client_id').value;
+      if (!clientId) { showToast('Client select karo!', 'error'); return; }
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`${API_URL}/api/devices/${assigningDeviceId}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ client_id: clientId, status: 'DEPLOYED' })
+        });
+        const data = await res.json();
+        if (data.success) { showToast('Device assign ho gaya! ✅'); closeAssignModal(); loadDevices(); }
+        else showToast(data.error || 'Assign failed', 'error');
+      } catch { showToast('Network error!', 'error'); }
+    }
+
+    // ── UNASSIGN ──────────────────────────────────────
+    let unassigningDeviceId = null;
+
+    function openUnassignConfirm(deviceId) {
+      unassigningDeviceId = deviceId;
+      const d = allDevices.find(x => x.id === deviceId);
+      document.getElementById('unassignDeviceName').textContent =
+        `"${d ? (d.brand + ' ' + d.model) : 'Device'}" client se unassign ho jayega aur AVAILABLE ho jayega.`;
+      document.getElementById('unassignConfirm').classList.add('active');
+    }
+
+    function closeUnassignConfirm() {
+      document.getElementById('unassignConfirm').classList.remove('active');
+      unassigningDeviceId = null;
+    }
+
+    async function confirmUnassign() {
+      if (!unassigningDeviceId) return;
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`${API_URL}/api/devices/${unassigningDeviceId}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ client_id: null, status: 'AVAILABLE' })
+        });
+        const data = await res.json();
+        if (data.success) { showToast('Device unassign ho gaya! 🔓'); closeUnassignConfirm(); loadDevices(); }
+        else showToast(data.error || 'Unassign failed', 'error');
+      } catch { showToast('Network error!', 'error'); }
+    }
+
     // Close on overlay click
     document.getElementById('editModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeEditModal(); });
     document.getElementById('deleteConfirm').addEventListener('click', e => { if (e.target === e.currentTarget) closeDeleteConfirm(); });
+    document.getElementById('assignModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAssignModal(); });
+    document.getElementById('unassignConfirm').addEventListener('click', e => { if (e.target === e.currentTarget) closeUnassignConfirm(); });
 
-    if (checkAuth()) loadDevices();
+    if (checkAuth()) { loadDevices(); loadClients(); }
   </script>
 </body>
 </html>
