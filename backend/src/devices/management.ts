@@ -202,6 +202,96 @@ export async function updateDevice(c: Context<{ Bindings: Env }>): Promise<Respo
   }
 }
 
+// ============================================
+// PUBLIC: Self-register from installer (no auth)
+// ============================================
+export async function selfRegisterDevice(c: Context<{ Bindings: Env }>): Promise<Response> {
+  try {
+    const body = await c.req.json();
+    const { deviceName, clientName, lanMacAddress, deviceType, rollNumber, serialNumber, brand, model, processor, ramGb, storageGb, storageType, monthlyRent } = body;
+
+    if (!lanMacAddress) {
+      return c.json({ success: false, message: 'LAN MAC address zaroori hai' }, 400);
+    }
+
+    const supabase = getSupabaseClient(c.env);
+
+    // Check if MAC already registered
+    const { data: existing } = await supabase
+      .from('devices')
+      .select('id, device_name, status')
+      .eq('lan_mac_address', lanMacAddress)
+      .single();
+
+    if (existing) {
+      return c.json({
+        success: true,
+        message: 'Device already registered',
+        data: existing,
+        alreadyExists: true
+      });
+    }
+
+    // Check roll number uniqueness
+    const { data: rollExists } = await supabase
+      .from('devices')
+      .select('id')
+      .eq('roll_number', rollNumber)
+      .single();
+
+    const finalRollNumber = rollExists ? null : rollNumber;
+
+    // Insert as PENDING
+    const { data, error } = await supabase
+      .from('devices')
+      .insert({
+        device_name:    deviceName || model,
+        client_name:    clientName || null,
+        lan_mac_address: lanMacAddress,
+        serial_number:  serialNumber || lanMacAddress.replace(/:/g, ''),
+        device_type:    deviceType || 'DESKTOP',
+        roll_number:    finalRollNumber,
+        brand:          brand || 'Generic',
+        model:          model || 'Unknown',
+        processor:      processor || null,
+        ram_gb:         ramGb || null,
+        storage_gb:     storageGb || null,
+        storage_type:   storageType || 'HDD',
+        monthly_rent:   monthlyRent || 0,
+        status:         'PENDING',
+        condition:      'GOOD'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Self-register error:', error);
+      return c.json({ success: false, message: 'Registration failed', error: error.message }, 500);
+    }
+
+    return c.json({ success: true, message: 'Device registered as PENDING', data });
+
+  } catch (error) {
+    console.error('Self-register error:', error);
+    return c.json({ success: false, message: 'Internal server error' }, 500);
+  }
+}
+
+// PUBLIC: Get device count (for roll number)
+export async function getDeviceCount(c: Context<{ Bindings: Env }>): Promise<Response> {
+  try {
+    const supabase = getSupabaseClient(c.env);
+    const { count, error } = await supabase
+      .from('devices')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) throw error;
+    return c.json({ success: true, count: count || 0 });
+  } catch (error) {
+    return c.json({ success: false, count: 0 });
+  }
+}
+
 // Delete device
 export async function deleteDevice(c: Context<{ Bindings: Env }>): Promise<Response> {
   try {

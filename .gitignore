@@ -37,3 +37,12 @@ Thumbs.db
 *.tmp
 *.temp
 database_schema.sql
+
+# Windows Agent - local only, not for GitHub
+windows-agent/
+
+# Build outputs
+bin/
+obj/
+*.exe
+*.dll

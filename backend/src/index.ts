@@ -6,7 +6,7 @@ import { loginHandler } from './auth/login';
 import { logoutHandler } from './auth/logout';
 import { authMiddleware, requireRole } from './middleware/auth';
 import { getDashboardStats, getRecentActivity } from './dashboard/stats';
-import { addDevice, getDevices, getDevice, updateDevice, deleteDevice } from './devices/management';
+import { addDevice, getDevices, getDevice, updateDevice, deleteDevice, selfRegisterDevice, getDeviceCount } from './devices/management';
 import {
   receiveDeviceStats,
   getDeviceMonitor,
@@ -91,6 +91,10 @@ app.post('/api/auth/login', loginHandler);
 app.post('/api/devices/stats', receiveDeviceStats);
 app.post('/api/devices/event', receiveDeviceEvent);
 app.post('/api/devices/screenshot', receiveScreenshot);
+
+// PUBLIC DEVICE SELF-REGISTRATION (Installer uses these — no auth)
+app.post('/api/devices/register', selfRegisterDevice);
+app.get('/api/devices/count', getDeviceCount);
 
 // ============================================
 // DEVICE MANAGEMENT (Protected - Admin only)

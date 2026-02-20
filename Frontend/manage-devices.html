@@ -49,6 +49,7 @@
     .stat-card.deployed   { border-left-color: #3b82f6; }
     .stat-card.maintenance{ border-left-color: #f59e0b; }
     .stat-card.retired    { border-left-color: #ef4444; }
+    .stat-card.pending    { border-left-color: #8b5cf6; }
     .stat-card .icon  { font-size: 32px; margin-bottom: 10px; }
     .stat-card .label { color: #666; font-size: 13px; margin-bottom: 5px; }
     .stat-card .value { font-size: 28px; font-weight: 700; color: #333; }
@@ -79,6 +80,7 @@
     .device-card.deployed   { border-left-color: #3b82f6; }
     .device-card.maintenance{ border-left-color: #f59e0b; }
     .device-card.retired    { border-left-color: #ef4444; }
+    .device-card.pending    { border-left-color: #8b5cf6; background: #faf8ff; }
 
     .device-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px; }
     .device-type {
@@ -90,6 +92,20 @@
     .device-status.deployed   { background: #cce5ff; color: #004085; }
     .device-status.maintenance{ background: #fff3cd; color: #856404; }
     .device-status.retired    { background: #f8d7da; color: #721c24; }
+    .device-status.pending    { background: #ede9fe; color: #5b21b6; }
+
+    .pending-banner {
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: white; font-size: 12px; font-weight: 700;
+      padding: 8px 12px; border-radius: 8px 8px 0 0;
+      margin: -20px -20px 15px -20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .pending-banner .approve-btn {
+      background: white; color: #6d28d9; border: none;
+      padding: 4px 12px; border-radius: 6px; font-size: 11px;
+      font-weight: 700; cursor: pointer;
+    }
 
     .device-title  { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 10px; }
     .device-serial {
@@ -220,6 +236,7 @@
         <div class="form-group">
           <label>Status</label>
           <select id="edit_status">
+            <option value="PENDING">Pending</option>
             <option value="AVAILABLE">Available</option>
             <option value="DEPLOYED">Deployed</option>
             <option value="MAINTENANCE">Maintenance</option>
@@ -322,6 +339,11 @@
         <div class="label">Retired</div>
         <div class="value" id="retiredCount">0</div>
       </div>
+      <div class="stat-card pending" id="pendingCard" style="display:none;cursor:pointer" onclick="filterDevices('PENDING', event)">
+        <div class="icon">🔔</div>
+        <div class="label">Pending Approval</div>
+        <div class="value" id="pendingCount">0</div>
+      </div>
     </div>
 
     <div class="filters">
@@ -331,6 +353,7 @@
       <button class="filter-btn" onclick="filterDevices('MAINTENANCE', event)">Maintenance</button>
       <button class="filter-btn" onclick="filterDevices('DESKTOP', event)">Desktops</button>
       <button class="filter-btn" onclick="filterDevices('LAPTOP', event)">Laptops</button>
+      <button class="filter-btn" id="pendingFilterBtn" onclick="filterDevices('PENDING', event)" style="display:none;border-color:#8b5cf6;color:#6d28d9;">🔔 Pending</button>
       <input type="text" class="search-box" placeholder="🔍 Search by serial, brand, model..."
              oninput="searchDevices(this.value)">
     </div>
@@ -343,6 +366,15 @@
   <script>
     const API_URL = 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
     let allDevices = [];
+
+    function getOnlineStatus(lastSeen) {
+      if (!lastSeen) return '<div style="font-size:12px;color:#999;margin-bottom:10px;">⚫ Never Connected</div>';
+      const diff = (Date.now() - new Date(lastSeen).getTime()) / 1000 / 60; // minutes
+      if (diff < 6)  return '<div style="font-size:12px;color:#10b981;font-weight:600;margin-bottom:10px;">🟢 Online</div>';
+      if (diff < 60) return `<div style="font-size:12px;color:#f59e0b;font-weight:600;margin-bottom:10px;">🟡 Offline (${Math.round(diff)} min ago)</div>`;
+      const hrs = Math.round(diff / 60);
+      return `<div style="font-size:12px;color:#ef4444;font-weight:600;margin-bottom:10px;">🔴 Offline (${hrs > 24 ? Math.round(hrs/24)+'d' : hrs+'h'} ago)</div>`;
+    }
 
     function checkAuth() {
       const token = localStorage.getItem('token');
@@ -373,6 +405,11 @@
       document.getElementById('deployedCount').textContent    = allDevices.filter(d => d.status === 'DEPLOYED').length;
       document.getElementById('maintenanceCount').textContent = allDevices.filter(d => d.status === 'MAINTENANCE').length;
       document.getElementById('retiredCount').textContent     = allDevices.filter(d => d.status === 'RETIRED').length;
+      const pendingCount = allDevices.filter(d => d.status === 'PENDING').length;
+      document.getElementById('pendingCount').textContent = pendingCount;
+      // Pending card/button sirf tab dikhao jab pending devices hain
+      document.getElementById('pendingCard').style.display     = pendingCount > 0 ? '' : 'none';
+      document.getElementById('pendingFilterBtn').style.display = pendingCount > 0 ? '' : 'none';
     }
 
     function displayDevices(devices) {
@@ -383,14 +420,41 @@
       }
       grid.innerHTML = devices.map(d => {
         const sc = d.status.toLowerCase();
+        // PENDING device ka special card
+        if (d.status === 'PENDING') {
+          return `
+          <div class="device-card pending">
+            <div class="pending-banner">
+              🔔 New Device — Approval Pending
+              <button class="approve-btn" onclick="approveDevice('${d.id}')">✅ Approve</button>
+            </div>
+            <div class="device-header">
+              <span class="device-type">${d.device_type || 'DESKTOP'}</span>
+              <span class="device-status pending">PENDING</span>
+            </div>
+            <div class="device-title">${d.device_name || d.brand || 'New Device'}</div>
+            <div class="device-serial">MAC: ${d.lan_mac_address || d.serial_number || 'N/A'}</div>
+            ${d.client_name ? `<div style="font-size:13px;color:#6d28d9;margin-bottom:10px;">🏢 ${d.client_name}</div>` : ''}
+            ${d.roll_number ? `<div style="font-size:13px;color:#666;margin-bottom:10px;">📋 Roll No: ${d.roll_number}</div>` : ''}
+            <div class="device-specs">
+              <div class="spec-item">⚙️ ${d.processor || 'N/A'}</div>
+              <div class="spec-item">💾 ${d.ram_gb || 0}GB RAM</div>
+            </div>
+            <div class="device-actions">
+              <button class="btn btn-edit btn-sm" onclick="openEditModal('${d.id}')">✏️ Edit & Approve</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteDevice('${d.id}','${d.device_name || 'Device'}')">🗑️ Reject</button>
+            </div>
+          </div>`;
+        }
+
         return `
           <div class="device-card ${sc}">
             <div class="device-header">
               <span class="device-type">${d.device_type}</span>
               <span class="device-status ${sc}">${d.status}</span>
             </div>
-            <div class="device-title">${d.brand || 'Unknown'} ${d.model || ''}</div>
-            <div class="device-serial">SN: ${d.serial_number}</div>
+            <div class="device-title">${d.device_name || ((d.brand || 'Unknown') + ' ' + (d.model || ''))}</div>
+            <div class="device-serial">SN: ${d.serial_number}${d.lan_mac_address ? ' | MAC: ' + d.lan_mac_address : ''}</div>
             <div class="device-specs">
               <div class="spec-item">⚙️ ${d.processor || 'N/A'}</div>
               <div class="spec-item">💾 ${d.ram_gb || 0}GB RAM</div>
@@ -398,11 +462,12 @@
               <div class="spec-item">🖥️ ${d.monitor_size || 0}" Monitor</div>
             </div>
             <div class="device-rent">₹${d.monthly_rent || 0}/month</div>
+            ${getOnlineStatus(d.last_seen)}
             <div class="device-actions">
               <button class="btn btn-edit btn-sm" onclick="openEditModal('${d.id}')">✏️ Edit</button>
               ${d.status === 'AVAILABLE' ? `<button class="btn btn-success btn-sm" onclick="openAssignModal('${d.id}')">📌 Assign</button>` : ''}
               ${d.status === 'DEPLOYED' ? `<button class="btn btn-warning btn-sm" onclick="openUnassignConfirm('${d.id}')">🔓 Unassign</button>` : ''}
-              <button class="btn btn-danger btn-sm" onclick="deleteDevice('${d.id}','${(d.brand||'') + ' ' + (d.model||'')}')">🗑️ Delete</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteDevice('${d.id}','${(d.device_name||d.brand||'') + ' ' + (d.model||'')}')">🗑️ Delete</button>
             </div>
             ${d.status === 'DEPLOYED' && d.client_name ? `<div style="margin-top:8px;font-size:12px;color:#3b82f6;font-weight:600;background:#eff6ff;padding:6px 10px;border-radius:6px;">👤 Assigned: ${d.client_name}</div>` : ''}
           </div>`;
@@ -415,7 +480,23 @@
       let filtered = allDevices;
       if (type === 'DESKTOP' || type === 'LAPTOP') filtered = allDevices.filter(d => d.device_type === type);
       else if (type !== 'ALL') filtered = allDevices.filter(d => d.status === type);
+      // PENDING devices hamesha pehle dikhao
+      filtered.sort((a, b) => (a.status === 'PENDING' ? -1 : b.status === 'PENDING' ? 1 : 0));
       displayDevices(filtered);
+    }
+
+    async function approveDevice(id) {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`${API_URL}/api/devices/${id}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'AVAILABLE' })
+        });
+        const data = await res.json();
+        if (data.success) { showToast('Device approved! ✅'); loadDevices(); }
+        else showToast(data.message || 'Error', 'error');
+      } catch { showToast('Network error!', 'error'); }
     }
 
     function searchDevices(q) {

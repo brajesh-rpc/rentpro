@@ -290,21 +290,39 @@ export async function getDeviceMonitor(c: Context<{ Bindings: Env }>): Promise<R
   try {
     const supabase = getSupabaseClient(c.env);
 
-    const { data, error } = await supabase
+    // 1. Live devices from view
+    const { data: liveData, error } = await supabase
       .from('device_live_status')
-      .select('*')
-      .order('online_status', { ascending: true }); // ONLINE first
+      .select('*');
+
+    // 2. PENDING devices (installer se aaye, approve nahi hue)
+    const { data: pendingData } = await supabase
+      .from('devices')
+      .select('id, device_name, serial_number, device_type, status, lan_mac_address, client_name, roll_number, processor, ram_gb, created_at')
+      .eq('status', 'PENDING');
+
+    // Merge: pending devices ko bhi include karo with status field
+    const pendingFormatted = (pendingData || []).map((d: any) => ({
+      ...d,
+      online_status: 'NEVER_SEEN',
+      tracking_mode: 'NORMAL',
+      unresolved_alerts: 0
+    }));
+
+    const data = [...pendingFormatted, ...(liveData || [])];
 
     if (error) throw error;
 
     // Summary counts
+    const nonPending = data?.filter((d: any) => d.status !== 'PENDING') || [];
     const summary = {
-      total: data?.length || 0,
-      online: data?.filter(d => d.online_status === 'ONLINE').length || 0,
-      offline: data?.filter(d => ['OFFLINE', 'LONG_OFFLINE'].includes(d.online_status)).length || 0,
-      superwatch: data?.filter(d => d.tracking_mode === 'SUPERWATCH').length || 0,
-      alerts: data?.reduce((sum: number, d: any) => sum + (d.unresolved_alerts || 0), 0) || 0,
-      neverSeen: data?.filter(d => d.online_status === 'NEVER_SEEN').length || 0
+      total: nonPending.length,
+      online: nonPending.filter((d: any) => d.online_status === 'ONLINE').length,
+      offline: nonPending.filter((d: any) => ['OFFLINE', 'LONG_OFFLINE'].includes(d.online_status)).length,
+      superwatch: nonPending.filter((d: any) => d.tracking_mode === 'SUPERWATCH').length,
+      alerts: nonPending.reduce((sum: number, d: any) => sum + (d.unresolved_alerts || 0), 0),
+      neverSeen: nonPending.filter((d: any) => d.online_status === 'NEVER_SEEN').length,
+      pending: pendingData?.length || 0
     };
 
     return c.json({ success: true, summary, data });
