@@ -941,7 +941,6 @@
     const statusKey = isSW ? 'superwatch' : statusClass(d.online_status);
     const hasData = d.cpu_usage !== null && d.cpu_usage !== undefined;
 
-    // SUPERWATCH banner
     const swBanner = isSW ? `
       <div class="superwatch-banner">
         <div class="sw-blink"></div>
@@ -949,36 +948,41 @@
         ${d.superwatch_reason ? `<span class="sw-reason">· ${d.superwatch_reason}</span>` : ''}
       </div>` : '';
 
-    // Resource bars
+    // Resource bars — CPU temp + disk health bhi
     const bars = hasData ? `
       <div class="resource-bars">
-        ${resourceBar('CPU', d.cpu_usage)}
+        ${resourceBar('CPU', d.cpu_usage, d.cpu_temperature ? `${d.cpu_temperature}°C` : null)}
         ${resourceBar('RAM', d.ram_usage)}
-        ${resourceBar('DSK', d.disk_usage)}
+        ${resourceBar('DSK', d.disk_usage, d.disk_health && d.disk_health !== 'Good' ? d.disk_health : null)}
       </div>` : `<div class="no-data-bars">No stats yet — agent not connected</div>`;
 
-    // Meta tags
-    const metaTags = [];
-    if (d.logged_in_user) metaTags.push(`<span class="meta-tag">👤 ${d.logged_in_user}</span>`);
-    if (d.ip_address) metaTags.push(`<span class="meta-tag">🌐 ${d.ip_address}</span>`);
-    if (d.connection_type) metaTags.push(`<span class="meta-tag">📡 ${d.connection_type}</span>`);
-    if (d.uptime_minutes) metaTags.push(`<span class="meta-tag">⏱ ${uptimeStr(d.uptime_minutes)}</span>`);
-    if (d.unresolved_alerts > 0) metaTags.push(`<span class="meta-tag ${d.unresolved_alerts > 2 ? 'crit' : 'warn'}">⚠️ ${d.unresolved_alerts} alert${d.unresolved_alerts > 1 ? 's' : ''}</span>`);
-    if (d.latest_critical_event) metaTags.push(`<span class="meta-tag crit">🚨 ${d.latest_critical_event}</span>`);
+    const offlineInfo = d.offline_minutes ? ` · Offline ${offlineStr(d.offline_minutes)}` : '';
+    const uptime = d.uptime_seconds ? uptimeStr(d.uptime_seconds) : (d.uptime_minutes ? uptimeStr(d.uptime_minutes * 60) : null);
 
-    // Actions
+    // Meta tags — sab naye fields
+    const metaTags = [];
+    if (d.logged_in_user) metaTags.push(`<span class="meta-tag">👤 ${escHtml(d.logged_in_user)}</span>`);
+    if (d.is_screen_locked) metaTags.push(`<span class="meta-tag warn">🔒 Screen Locked</span>`);
+    if (d.connection_type) metaTags.push(`<span class="meta-tag">📡 ${escHtml(d.connection_type)}</span>`);
+    if (d.ip_address) metaTags.push(`<span class="meta-tag">🏠 ${escHtml(d.ip_address)}</span>`);
+    if (d.public_ip_address && d.public_ip_address !== d.ip_address) metaTags.push(`<span class="meta-tag">🌐 ${escHtml(d.public_ip_address)}</span>`);
+    if (d.geo_city) metaTags.push(`<span class="meta-tag">📍 ${escHtml(d.geo_city)}${d.geo_region ? ', ' + d.geo_region : ''}</span>`);
+    if (d.gateway_mac_address) metaTags.push(`<span class="meta-tag">🔀 GW: ${escHtml(d.gateway_mac_address)}</span>`);
+    if (d.wifi_ssid) metaTags.push(`<span class="meta-tag">📶 ${escHtml(d.wifi_ssid)}</span>`);
+    if (uptime) metaTags.push(`<span class="meta-tag">⏱ ${uptime}</span>`);
+    if (d.windows_version) metaTags.push(`<span class="meta-tag">🪟 ${escHtml(d.windows_version.replace('Microsoft ',''))}</span>`);
+    if (d.active_window_title) metaTags.push(`<span class="meta-tag" title="${escHtml(d.active_window_title)}">🖥 ${escHtml(d.active_window_title.substring(0,30))}${d.active_window_title.length > 30 ? '…' : ''}</span>`);
+    if (d.running_process_count) metaTags.push(`<span class="meta-tag">⚙️ ${d.running_process_count} processes</span>`);
+    if (d.geo_isp) metaTags.push(`<span class="meta-tag">🏢 ${escHtml(d.geo_isp)}</span>`);
+    if (d.disk_health && d.disk_health !== 'Good' && d.disk_health !== 'Unknown') metaTags.push(`<span class="meta-tag crit">💾 Disk: ${escHtml(d.disk_health)}</span>`);
+    if (d.unresolved_alerts > 0) metaTags.push(`<span class="meta-tag ${d.unresolved_alerts > 2 ? 'crit' : 'warn'}">⚠️ ${d.unresolved_alerts} alert${d.unresolved_alerts > 1 ? 's' : ''}</span>`);
+    if (d.latest_critical_event) metaTags.push(`<span class="meta-tag crit">🚨 ${escHtml(d.latest_critical_event)}</span>`);
+
     const modeBtn = isSW
       ? `<button class="act-btn sw-off" onclick="openSwModal('${d.id}','off','${escHtml(d.serial_number)}')">⏹ Normal Mode</button>`
       : `<button class="act-btn sw-on" onclick="openSwModal('${d.id}','on','${escHtml(d.serial_number)}')">👁️ SUPERWATCH</button>`;
 
-    const screenshotBtn = isSW
-      ? `<button class="act-btn shots" onclick="viewScreenshots('${d.id}')">📸 Shots</button>`
-      : '';
-
-    // Offline time
-    const offlineInfo = d.offline_minutes
-      ? ` · Offline ${offlineStr(d.offline_minutes)}`
-      : '';
+    const screenshotBtn = isSW ? `<button class="act-btn shots" onclick="viewScreenshots('${d.id}')">📸 Shots</button>` : '';
 
     return `
     <div class="device-card c-${statusKey}" id="card-${d.id}">
@@ -1005,7 +1009,7 @@
     </div>`;
   }
 
-  function resourceBar(label, val) {
+  function resourceBar(label, val, extra) {
     const pct = Math.min(100, Math.round(val || 0));
     const cls = pct < 60 ? 'low' : pct < 80 ? 'med' : 'high';
     return `
@@ -1014,7 +1018,7 @@
       <div class="bar-track">
         <div class="bar-fill ${cls}" style="width:${pct}%"></div>
       </div>
-      <span class="res-val">${pct}%</span>
+      <span class="res-val">${pct}%${extra ? ` <span style="font-size:9px;color:#9CA3AF">${extra}</span>` : ''}</span>
     </div>`;
   }
 
@@ -1302,10 +1306,11 @@
     return '● Never Seen';
   }
 
-  function uptimeStr(mins) {
-    if (!mins) return '';
+  function uptimeStr(secs) {
+    if (!secs) return '';
+    const mins = Math.floor(secs / 60);
     if (mins < 60) return `${mins}m uptime`;
-    if (mins < 1440) return `${Math.floor(mins/60)}h uptime`;
+    if (mins < 1440) return `${Math.floor(mins/60)}h ${mins%60}m uptime`;
     return `${Math.floor(mins/1440)}d uptime`;
   }
 

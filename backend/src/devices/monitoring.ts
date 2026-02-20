@@ -159,22 +159,53 @@ export async function receiveDeviceStats(c: Context<{ Bindings: Env }>): Promise
     const {
       deviceId,
       deviceToken,
+      // Hardware
       cpuUsage,
+      cpuTemperature,
       ramUsage,
       ramTotal,
       ramUsed,
       diskUsage,
       diskTotal,
       diskUsed,
+      diskHealth,
       isOnline,
-      loggedInUser,
       timestamp,
+      // System
+      computerName,
+      currentUser,
+      windowsVersion,
+      windowsBuild,
+      uptimeSeconds,
+      lastBootTime,
+      // Network (existing)
       lanMacAddress,
       activeMacAddress,
       connectionType,
       ipAddress,
-      computerName,
-      // New SUPERWATCH fields
+      // Network (new)
+      publicIpAddress,
+      gatewayMacAddress,
+      gatewayIpAddress,
+      wifiSsid,
+      wifiBssid,
+      nearbyWifiNetworks,
+      // Geolocation
+      geoCountry,
+      geoRegion,
+      geoCity,
+      geoIsp,
+      geoLatitude,
+      geoLongitude,
+      // Usage
+      activeWindowTitle,
+      activeProcessName,
+      isScreenLocked,
+      runningProcessCount,
+      // USB
+      connectedUsbDevices,
+      // Legacy fields (backward compat)
+      loggedInUser,
       cpuTemp,
       hddTemp,
       uptimeMinutes,
@@ -209,34 +240,67 @@ export async function receiveDeviceStats(c: Context<{ Bindings: Env }>): Promise
     // Get current tracking mode from DB (server is source of truth)
     const currentMode = device.tracking_mode || 'NORMAL';
 
-    // Insert hardware stats
-    const { error: statsError } = await supabase
+    const corePayload: any = {
+      device_id:          device.id,
+      timestamp:          timestamp || new Date().toISOString(),
+      tracking_mode:      currentMode,
+      cpu_usage:          cpuUsage,
+      ram_usage:          ramUsage,
+      disk_usage:         diskUsage,
+      is_online:          isOnline,
+      computer_name:      computerName,
+      logged_in_user:     currentUser || loggedInUser || null,
+      lan_mac_address:    lanMacAddress,
+      active_mac_address: activeMacAddress,
+      connection_type:    connectionType,
+      ip_address:         ipAddress,
+    };
+
+    const { data: insertedRow, error: statsError } = await supabase
       .from('hardware_stats')
-      .insert({
-        device_id: device.id,
-        cpu_usage: cpuUsage,
-        ram_usage: ramUsage,
-        disk_usage: diskUsage,
-        is_online: isOnline,
-        logged_in_user: loggedInUser,
-        timestamp: timestamp || new Date().toISOString(),
-        lan_mac_address: lanMacAddress,
-        active_mac_address: activeMacAddress,
-        connection_type: connectionType,
-        ip_address: ipAddress,
-        computer_name: computerName,
-        tracking_mode: currentMode,
-        // SUPERWATCH fields (null if NORMAL mode)
-        cpu_temp: cpuTemp || null,
-        hdd_temp: hddTemp || null,
-        uptime_minutes: uptimeMinutes || null,
-        restart_count_24h: restartCount24h || 0,
-        active_window: activeWindow || null,
-        last_boot: lastBoot || null
-      });
+      .insert(corePayload)
+      .select('id')
+      .single();
 
     if (statsError) {
       console.error('Stats insert error:', statsError);
+    }
+
+    if (insertedRow?.id) {
+      const extendedPayload: any = {
+        cpu_temperature:       cpuTemperature || cpuTemp || null,
+        disk_health:           diskHealth || null,
+        windows_version:       windowsVersion || null,
+        windows_build:         windowsBuild || null,
+        uptime_seconds:        uptimeSeconds || (uptimeMinutes ? uptimeMinutes * 60 : null),
+        last_boot_time:        lastBootTime || lastBoot || null,
+        public_ip_address:     publicIpAddress || null,
+        gateway_mac_address:   gatewayMacAddress || null,
+        gateway_ip_address:    gatewayIpAddress || null,
+        wifi_ssid:             wifiSsid || null,
+        wifi_bssid:            wifiBssid || null,
+        nearby_wifi_networks:  nearbyWifiNetworks || null,
+        geo_country:           geoCountry || null,
+        geo_region:            geoRegion || null,
+        geo_city:              geoCity || null,
+        geo_isp:               geoIsp || null,
+        geo_latitude:          geoLatitude || null,
+        geo_longitude:         geoLongitude || null,
+        active_window_title:   activeWindowTitle || activeWindow || null,
+        active_process_name:   activeProcessName || null,
+        is_screen_locked:      isScreenLocked || false,
+        running_process_count: runningProcessCount || null,
+        connected_usb_devices: connectedUsbDevices || null,
+      };
+
+      const { error: extError } = await supabase
+        .from('hardware_stats')
+        .update(extendedPayload)
+        .eq('id', insertedRow.id);
+
+      if (extError) {
+        console.warn('Extended stats update failed:', extError.message);
+      }
     }
 
     // Update device last_seen and MAC addresses
