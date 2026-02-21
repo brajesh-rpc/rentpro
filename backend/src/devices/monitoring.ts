@@ -240,39 +240,27 @@ export async function receiveDeviceStats(c: Context<{ Bindings: Env }>): Promise
     // Get current tracking mode from DB (server is source of truth)
     const currentMode = device.tracking_mode || 'NORMAL';
 
-    const corePayload: any = {
-      device_id:          device.id,
-      timestamp:          timestamp || new Date().toISOString(),
-      tracking_mode:      currentMode,
-      cpu_usage:          cpuUsage,
-      ram_usage:          ramUsage,
-      disk_usage:         diskUsage,
-      is_online:          isOnline,
-      computer_name:      computerName,
-      logged_in_user:     currentUser || loggedInUser || null,
-      lan_mac_address:    lanMacAddress,
-      active_mac_address: activeMacAddress,
-      connection_type:    connectionType,
-      ip_address:         ipAddress,
-    };
-
-    const { data: insertedRow, error: statsError } = await supabase
+    const { error: statsError } = await supabase
       .from('hardware_stats')
-      .insert(corePayload)
-      .select('id')
-      .single();
-
-    if (statsError) {
-      console.error('Stats insert error:', statsError);
-    }
-
-    if (insertedRow?.id) {
-      const extendedPayload: any = {
+      .insert({
+        device_id:             device.id,
+        timestamp:             timestamp || new Date().toISOString(),
+        tracking_mode:         currentMode,
+        cpu_usage:             cpuUsage,
+        ram_usage:             ramUsage,
+        disk_usage:            diskUsage,
+        is_online:             isOnline,
+        computer_name:         computerName,
+        logged_in_user:        currentUser || loggedInUser || null,
+        lan_mac_address:       lanMacAddress,
+        active_mac_address:    activeMacAddress,
+        connection_type:       connectionType,
+        ip_address:            ipAddress,
         cpu_temperature:       cpuTemperature || cpuTemp || null,
         disk_health:           diskHealth || null,
         windows_version:       windowsVersion || null,
         windows_build:         windowsBuild || null,
-        uptime_seconds:        uptimeSeconds || (uptimeMinutes ? uptimeMinutes * 60 : null),
+        uptime_seconds:        uptimeSeconds || null,
         last_boot_time:        lastBootTime || lastBoot || null,
         public_ip_address:     publicIpAddress || null,
         gateway_mac_address:   gatewayMacAddress || null,
@@ -291,16 +279,11 @@ export async function receiveDeviceStats(c: Context<{ Bindings: Env }>): Promise
         is_screen_locked:      isScreenLocked || false,
         running_process_count: runningProcessCount || null,
         connected_usb_devices: connectedUsbDevices || null,
-      };
+      });
 
-      const { error: extError } = await supabase
-        .from('hardware_stats')
-        .update(extendedPayload)
-        .eq('id', insertedRow.id);
-
-      if (extError) {
-        console.warn('Extended stats update failed:', extError.message);
-      }
+    if (statsError) {
+      console.error('Stats insert error:', JSON.stringify(statsError));
+      return c.json({ success: false, message: `DB insert failed: ${statsError.message}`, lockStatus: false }, 500);
     }
 
     // Update device last_seen and MAC addresses
