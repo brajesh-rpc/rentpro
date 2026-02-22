@@ -538,6 +538,90 @@
     .event-data { font-size: 11px; color: var(--text-light); margin-top: 2px; font-family: monospace; }
     .event-when { font-size: 10px; color: var(--text-light); margin-top: 3px; }
 
+    /* ── HISTORY MODAL ── */
+    .history-modal { max-width: 900px; }
+    .history-controls {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      align-items: center; margin-bottom: 20px;
+      padding: 16px; background: #F8FAFC;
+      border-radius: 10px; border: 1px solid var(--border);
+    }
+    .slider-group { flex: 1; min-width: 200px; }
+    .slider-label {
+      font-size: 11px; font-weight: 700; color: var(--text-light);
+      text-transform: uppercase; letter-spacing: 0.3px;
+      margin-bottom: 8px; display: flex;
+      justify-content: space-between;
+    }
+    .slider-label span { color: var(--primary); font-size: 13px; }
+    input[type=range] {
+      width: 100%; -webkit-appearance: none;
+      height: 4px; border-radius: 2px;
+      background: #E2E8F0; outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--primary); cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .gran-buttons { display: flex; gap: 6px; margin-top: 4px; }
+    .gran-btn {
+      padding: 4px 12px; border-radius: 6px;
+      border: 1px solid var(--border); font-size: 11px;
+      font-weight: 600; cursor: pointer;
+      background: white; color: var(--text-light);
+      transition: all 0.2s;
+    }
+    .gran-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .chart-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin-bottom: 16px;
+    }
+    @media (max-width: 600px) { .chart-grid { grid-template-columns: 1fr; } }
+    .chart-box {
+      background: #F8FAFC; border-radius: 10px;
+      padding: 14px; border: 1px solid var(--border);
+    }
+    .chart-box-full { grid-column: 1/-1; }
+    .chart-title {
+      font-size: 12px; font-weight: 700;
+      color: var(--text-dark); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .history-events {
+      background: #F8FAFC; border-radius: 10px;
+      padding: 14px; border: 1px solid var(--border);
+      max-height: 200px; overflow-y: auto;
+    }
+    .history-events-title {
+      font-size: 12px; font-weight: 700;
+      margin-bottom: 10px; color: var(--text-dark);
+    }
+    .change-row {
+      display: flex; gap: 8px; padding: 6px 0;
+      border-bottom: 1px solid #E2E8F0;
+      font-size: 11px; align-items: center;
+    }
+    .change-row:last-child { border-bottom: none; }
+    .change-time { color: var(--text-light); width: 100px; flex-shrink: 0; }
+    .change-field { font-weight: 700; color: var(--text-dark); width: 80px; flex-shrink: 0; }
+    .change-val { color: var(--text-light); flex: 1; }
+    .history-loading {
+      text-align: center; padding: 40px;
+      color: var(--text-light);
+    }
+    .hist-stats {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .hist-stat {
+      background: white; border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 14px;
+      font-size: 11px; color: var(--text-light);
+    }
+    .hist-stat strong { font-size: 16px; color: var(--text-dark); display: block; }
+
     /* Toast */
     .toast {
       position: fixed; bottom: 24px; right: 24px;
@@ -822,9 +906,81 @@
   </div>
 </div>
 
+<!-- HISTORY MODAL -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal history-modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="historyModalTitle">Device History</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:2px" id="historyModalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('historyModal')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Controls -->
+      <div class="history-controls">
+        <div class="slider-group">
+          <div class="slider-label">Time Range <span id="daysLabel">1 day</span></div>
+          <input type="range" id="daysSlider" min="1" max="30" value="1" oninput="onDaysChange(this.value)">
+        </div>
+        <div class="slider-group">
+          <div class="slider-label">Granularity</div>
+          <div class="gran-buttons">
+            <button class="gran-btn active" id="gran-minute" onclick="setGran('minute')">Minute</button>
+            <button class="gran-btn" id="gran-hour" onclick="setGran('hour')">Hour</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="font-size:12px;padding:8px 16px" onclick="loadHistory()">🔄 Load</button>
+      </div>
+
+      <!-- Loading -->
+      <div id="historyLoading" class="history-loading" style="display:none">
+        <div class="loading-spinner" style="margin:0 auto 8px"></div>
+        Loading history...
+      </div>
+
+      <!-- Content -->
+      <div id="historyContent" style="display:none">
+
+        <!-- Stats summary -->
+        <div class="hist-stats" id="histStatsSummary"></div>
+
+        <!-- Charts grid -->
+        <div class="chart-grid">
+          <div class="chart-box">
+            <div class="chart-title">🔵 CPU Usage %</div>
+            <canvas id="chartCpu" height="120"></canvas>
+          </div>
+          <div class="chart-box">
+            <div class="chart-title">🟢 RAM Usage %</div>
+            <canvas id="chartRam" height="120"></canvas>
+          </div>
+          <div class="chart-box">
+            <div class="chart-title">🟠 Disk Usage %</div>
+            <canvas id="chartDsk" height="120"></canvas>
+          </div>
+          <div class="chart-box">
+            <div class="chart-title">🌡️ CPU Temperature °C</div>
+            <canvas id="chartTemp" height="120"></canvas>
+          </div>
+        </div>
+
+        <!-- Changes log -->
+        <div class="history-events">
+          <div class="history-events-title">🔍 Network / Location Changes</div>
+          <div id="historyChanges"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
   const API = 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
   let token = '';
@@ -835,6 +991,10 @@
   let refreshInterval = 30;
   let countdown = 30;
   let editableSettings = [];
+  let historyDeviceId = '';
+  let historyGranularity = 'minute';
+  let historyCharts = {};
+  let historyDays = 1;
 
   // ── INIT ──────────────────────────────────────────
   function init() {
@@ -985,7 +1145,7 @@
     const screenshotBtn = isSW ? `<button class="act-btn shots" onclick="viewScreenshots('${d.id}')">📸 Shots</button>` : '';
 
     return `
-    <div class="device-card c-${statusKey}" id="card-${d.id}">
+    <div class="device-card c-${statusKey}" id="card-${d.id}" onclick="openHistory('${d.id}','${escHtml(d.serial_number)}','${escHtml(d.company_name||'')}')" style="cursor:pointer">
       ${swBanner}
       <div class="device-card-top">
         <div class="device-title">
@@ -1001,7 +1161,7 @@
       </div>
       ${bars}
       ${metaTags.length > 0 ? `<div class="device-meta">${metaTags.join('')}</div>` : ''}
-      <div class="card-actions">
+      <div class="card-actions" onclick="event.stopPropagation()">
         <button class="act-btn events" onclick="viewEvents('${d.id}','${escHtml(d.serial_number)}')">📋 Events</button>
         ${modeBtn}
         ${screenshotBtn}
@@ -1248,6 +1408,148 @@
 
   async function viewScreenshots(deviceId) {
     showToast('Screenshots feature — opening soon', '');
+  }
+
+  // ── HISTORY MODAL ───────────────────────────────────────────────
+  function openHistory(deviceId, serial, companyName) {
+    historyDeviceId = deviceId;
+    historyDays = 1;
+    historyGranularity = 'minute';
+    document.getElementById('historyModalTitle').textContent = `📈 History — ${serial}`;
+    document.getElementById('historyModalSub').textContent = companyName || '';
+    document.getElementById('daysSlider').value = 1;
+    document.getElementById('daysLabel').textContent = '1 day';
+    setGran('minute');
+    document.getElementById('historyContent').style.display = 'none';
+    document.getElementById('historyLoading').style.display = 'none';
+    document.getElementById('historyModal').classList.add('open');
+    loadHistory();
+  }
+
+  function onDaysChange(val) {
+    historyDays = parseInt(val);
+    document.getElementById('daysLabel').textContent = val == 1 ? '1 day' : `${val} days`;
+  }
+
+  function setGran(g) {
+    historyGranularity = g;
+    document.querySelectorAll('.gran-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`gran-${g}`).classList.add('active');
+  }
+
+  async function loadHistory() {
+    if (!historyDeviceId) return;
+    document.getElementById('historyLoading').style.display = 'block';
+    document.getElementById('historyContent').style.display = 'none';
+
+    // Destroy old charts
+    Object.values(historyCharts).forEach(c => c.destroy());
+    historyCharts = {};
+
+    try {
+      const res = await fetch(
+        `${API}/api/devices/${historyDeviceId}/history?days=${historyDays}&granularity=${historyGranularity}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+
+      const rows = data.data || [];
+      document.getElementById('historyLoading').style.display = 'none';
+
+      if (rows.length === 0) {
+        document.getElementById('historyContent').style.display = 'block';
+        document.getElementById('histStatsSummary').innerHTML = '<div class="empty-state">No data for this time range</div>';
+        document.getElementById('historyChanges').innerHTML = '';
+        return;
+      }
+
+      // Summary stats
+      const cpuAvg = (rows.reduce((s,r) => s+(r.cpu_usage||0),0)/rows.length).toFixed(1);
+      const ramAvg = (rows.reduce((s,r) => s+(r.ram_usage||0),0)/rows.length).toFixed(1);
+      const cpuMax = Math.max(...rows.map(r=>r.cpu_usage||0)).toFixed(1);
+      const tempAvg = rows.filter(r=>r.cpu_temperature>0).length > 0
+        ? (rows.filter(r=>r.cpu_temperature>0).reduce((s,r)=>s+(r.cpu_temperature||0),0)/rows.filter(r=>r.cpu_temperature>0).length).toFixed(1)
+        : null;
+      document.getElementById('histStatsSummary').innerHTML = `
+        <div class="hist-stat"><strong>${rows.length}</strong> data points</div>
+        <div class="hist-stat"><strong>${cpuAvg}%</strong> Avg CPU</div>
+        <div class="hist-stat"><strong>${cpuMax}%</strong> Max CPU</div>
+        <div class="hist-stat"><strong>${ramAvg}%</strong> Avg RAM</div>
+        ${tempAvg ? `<div class="hist-stat"><strong>${tempAvg}°C</strong> Avg Temp</div>` : ''}
+      `;
+
+      // Chart labels
+      const labels = rows.map(r => {
+        const d = new Date(r.timestamp);
+        if (historyGranularity === 'hour') return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + ' ' + d.getHours() + 'h';
+        if (historyDays > 3) return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
+        return d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
+      });
+
+      // Thin out labels if too many
+      const step = Math.ceil(labels.length / 20);
+      const sparseLabels = labels.map((l,i) => i % step === 0 ? l : '');
+
+      const chartOpts = (color) => ({
+        responsive: true,
+        animation: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { font:{size:9}, maxRotation:45, autoSkip:true, maxTicksLimit:10 } },
+          y: { beginAtZero: true, ticks: { font:{size:9} } }
+        },
+        elements: { point: { radius: rows.length > 200 ? 0 : 2 } }
+      });
+
+      const mkChart = (id, label, data, color) => {
+        const ctx = document.getElementById(id).getContext('2d');
+        historyCharts[id] = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: sparseLabels,
+            datasets: [{ label, data, borderColor: color, backgroundColor: color+'22', borderWidth: 1.5, fill: true, tension: 0.3 }]
+          },
+          options: chartOpts(color)
+        });
+      };
+
+      mkChart('chartCpu', 'CPU %', rows.map(r=>r.cpu_usage||0), '#4A90E2');
+      mkChart('chartRam', 'RAM %', rows.map(r=>r.ram_usage||0), '#22C55E');
+      mkChart('chartDsk', 'Disk %', rows.map(r=>r.disk_usage||0), '#F59E0B');
+      mkChart('chartTemp', 'Temp °C', rows.map(r=>r.cpu_temperature||0), '#EF4444');
+
+      // Changes log — gateway MAC, WiFi, City changes
+      const changes = [];
+      let prevGw = null, prevWifi = null, prevCity = null;
+      rows.forEach(r => {
+        if (prevGw && r.gateway_mac_address && prevGw !== r.gateway_mac_address)
+          changes.push({ time: r.timestamp, field: 'Gateway', val: `${prevGw} → ${r.gateway_mac_address}`, crit: true });
+        if (prevWifi && r.wifi_ssid && prevWifi !== r.wifi_ssid)
+          changes.push({ time: r.timestamp, field: 'WiFi', val: `${prevWifi} → ${r.wifi_ssid}`, crit: false });
+        if (prevCity && r.geo_city && prevCity !== r.geo_city)
+          changes.push({ time: r.timestamp, field: 'City', val: `${prevCity} → ${r.geo_city}`, crit: true });
+        if (r.gateway_mac_address) prevGw = r.gateway_mac_address;
+        if (r.wifi_ssid) prevWifi = r.wifi_ssid;
+        if (r.geo_city) prevCity = r.geo_city;
+      });
+
+      document.getElementById('historyChanges').innerHTML = changes.length === 0
+        ? '<div style="color:#9CA3AF;font-size:11px;padding:8px 0">✅ No network/location changes detected</div>'
+        : changes.map(c => `
+            <div class="change-row">
+              <span class="change-time">${new Date(c.time).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span>
+              <span class="change-field" style="color:${c.crit?'#B91C1C':'#B45309'}">${c.field}</span>
+              <span class="change-val">${escHtml(c.val)}</span>
+            </div>`).join('');
+
+      document.getElementById('historyContent').style.display = 'block';
+
+    } catch (err) {
+      document.getElementById('historyLoading').style.display = 'none';
+      document.getElementById('historyContent').style.display = 'block';
+      document.getElementById('histStatsSummary').innerHTML = `<div class="empty-state">❌ Failed: ${escHtml(err.message)}</div>`;
+    }
   }
 
   // ── FILTER ────────────────────────────────────────

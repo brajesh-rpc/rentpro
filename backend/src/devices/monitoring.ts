@@ -787,6 +787,59 @@ export async function updateSetting(c: Context<{ Bindings: Env }>): Promise<Resp
 }
 
 // ============================================
+// GET /api/devices/:id/history
+// Historical stats with time range + granularity
+// ============================================
+export async function getDeviceHistory(c: Context<{ Bindings: Env }>): Promise<Response> {
+  try {
+    const deviceId    = c.req.param('id');
+    const days        = Math.min(30, Math.max(1, parseInt(c.req.query('days') || '1')));
+    const granularity = c.req.query('granularity') || 'minute';
+
+    const supabase = getSupabaseClient(c.env);
+    const since    = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data, error } = await supabase
+      .from('hardware_stats')
+      .select('timestamp, cpu_usage, ram_usage, disk_usage, cpu_temperature, ip_address, gateway_mac_address, wifi_ssid, geo_city, active_window_title, is_screen_locked, running_process_count')
+      .eq('device_id', deviceId)
+      .gte('timestamp', since)
+      .order('timestamp', { ascending: true })
+      .limit(2000);
+
+    if (error) throw error;
+
+    // Client-side bucket aggregation for hour granularity
+    let result = data || [];
+    if (granularity === 'hour' && result.length > 0) {
+      const buckets: Record<string, any[]> = {};
+      result.forEach(row => {
+        const hour = new Date(row.timestamp).toISOString().slice(0, 13) + ':00:00Z';
+        if (!buckets[hour]) buckets[hour] = [];
+        buckets[hour].push(row);
+      });
+      result = Object.entries(buckets).map(([ts, rows]) => ({
+        timestamp: ts,
+        cpu_usage:          rows.reduce((s, r) => s + (r.cpu_usage || 0), 0) / rows.length,
+        ram_usage:          rows.reduce((s, r) => s + (r.ram_usage || 0), 0) / rows.length,
+        disk_usage:         rows.reduce((s, r) => s + (r.disk_usage || 0), 0) / rows.length,
+        cpu_temperature:    rows.reduce((s, r) => s + (r.cpu_temperature || 0), 0) / rows.length,
+        gateway_mac_address: rows[rows.length - 1].gateway_mac_address,
+        wifi_ssid:           rows[rows.length - 1].wifi_ssid,
+        geo_city:            rows[rows.length - 1].geo_city,
+        active_window_title: rows[rows.length - 1].active_window_title,
+      }));
+    }
+
+    return c.json({ success: true, granularity, days, total: result.length, data: result });
+
+  } catch (error) {
+    console.error('Device history error:', error);
+    return c.json({ success: false, message: 'Internal server error' }, 500);
+  }
+}
+
+// ============================================
 // GET /api/devices/:id/events
 // Get event history for a device
 // ============================================

@@ -19,7 +19,8 @@ import {
   getScreenshot,
   getSettings,
   updateSetting,
-  getDeviceEvents
+  getDeviceEvents,
+  getDeviceHistory
 } from './devices/monitoring';
 import { registerClient, getClients, getClient, updateClient, deleteClient } from './clients/management';
 import { addRentalItem, getClientRentalItems, getRentalItemHistory, removeRentalItem } from './rental-items/management';
@@ -109,6 +110,7 @@ app.get('/api/devices/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'),
 app.put('/api/devices/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), updateDevice);
 app.delete('/api/devices/:id', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), deleteDevice);
 app.get('/api/devices/:id/events', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getDeviceEvents);
+app.get('/api/devices/:id/history', authMiddleware, requireRole('SUPER_ADMIN', 'STAFF'), getDeviceHistory);
 app.get('/api/devices/:id/screenshots', authMiddleware, requireRole('SUPER_ADMIN'), getScreenshots);
 app.get('/api/devices/:id/screenshot/:screenshotId', authMiddleware, requireRole('SUPER_ADMIN'), getScreenshot);
 
