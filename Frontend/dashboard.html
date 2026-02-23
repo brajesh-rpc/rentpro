@@ -236,7 +236,285 @@
       color: var(--icon-color);
       font-size: 10px;
       margin-left: 4px;
+      transition: transform 0.2s;
     }
+
+    /* USER DROPDOWN */
+    .user-dropdown-wrapper {
+      position: relative;
+    }
+
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 260px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      border: 1px solid var(--border-color);
+      z-index: 999;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+
+    .user-dropdown.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .dropdown-header {
+      padding: 16px;
+      background: linear-gradient(135deg, #4A90E2 0%, #6c5ce7 100%);
+      color: white;
+    }
+
+    .dropdown-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 10px;
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+
+    .dropdown-user-name {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .dropdown-user-email {
+      font-size: 12px;
+      opacity: 0.85;
+      margin-top: 3px;
+    }
+
+    .dropdown-user-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border-color);
+      margin: 0;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-dark);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .dropdown-item:hover {
+      background: var(--bg-gray);
+    }
+
+    .dropdown-item.danger {
+      color: var(--danger-red);
+    }
+
+    .dropdown-item.danger:hover {
+      background: #fff5f5;
+    }
+
+    .dropdown-item-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      background: var(--bg-gray);
+      flex-shrink: 0;
+    }
+
+    .dropdown-item.danger .dropdown-item-icon {
+      background: #fff5f5;
+    }
+
+    .dropdown-item-text {
+      flex: 1;
+    }
+
+    .dropdown-item-label {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .dropdown-item-sublabel {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 1px;
+    }
+
+    /* Change Password Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: 14px;
+      width: 90%;
+      max-width: 420px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      animation: modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .modal-subtitle {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px rgba(74,144,226,0.1);
+    }
+
+    .btn-modal {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel-modal {
+      background: var(--bg-gray);
+      color: var(--text-dark);
+    }
+
+    .btn-cancel-modal:hover {
+      background: var(--border-color);
+    }
+
+    .btn-save-modal {
+      background: var(--primary-blue);
+      color: white;
+    }
+
+    .btn-save-modal:hover {
+      background: #3A7BC8;
+    }
+
+    /* Toast */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 9999;
+      transform: translateY(80px);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .toast-msg.show {
+      transform: translateY(0);
+    }
+
+    .toast-msg.success { background: #10b981; }
+    .toast-msg.error   { background: #ef4444; }
     
     /* SIDEBAR */
     .sidebar {
@@ -623,13 +901,63 @@
         ❓
       </button>
       
-      <div class="user-menu" onclick="toggleUserMenu()">
-        <div class="user-avatar">BK</div>
-        <div class="user-info">
-          <div class="user-name" id="userName">Loading...</div>
-          <div class="user-role">Super Admin</div>
+      <div class="user-dropdown-wrapper" id="userDropdownWrapper">
+        <div class="user-menu" onclick="toggleUserMenu()" id="userMenuBtn">
+          <div class="user-avatar" id="userAvatar">BK</div>
+          <div class="user-info">
+            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-role" id="userRole">Super Admin</div>
+          </div>
+          <span class="dropdown-arrow" id="dropdownArrow">▼</span>
         </div>
-        <span class="dropdown-arrow">▼</span>
+
+        <!-- DROPDOWN MENU -->
+        <div class="user-dropdown" id="userDropdown">
+          <!-- Header with user info -->
+          <div class="dropdown-header">
+            <div class="dropdown-avatar" id="dropdownAvatar">BK</div>
+            <div class="dropdown-user-name" id="dropdownName">Loading...</div>
+            <div class="dropdown-user-email" id="dropdownEmail">-</div>
+            <div class="dropdown-user-badge" id="dropdownRole">Super Admin</div>
+          </div>
+
+          <!-- Menu Items -->
+          <div style="padding: 6px 0;">
+            <button class="dropdown-item" onclick="openProfileModal()">
+              <div class="dropdown-item-icon">👤</div>
+              <div class="dropdown-item-text">
+                <div class="dropdown-item-label">My Profile</div>
+                <div class="dropdown-item-sublabel">Account details dekhein</div>
+              </div>
+            </button>
+
+            <a href="/settings.html" class="dropdown-item">
+              <div class="dropdown-item-icon">⚙️</div>
+              <div class="dropdown-item-text">
+                <div class="dropdown-item-label">Settings</div>
+                <div class="dropdown-item-sublabel">System configuration</div>
+              </div>
+            </a>
+
+            <button class="dropdown-item" onclick="openChangePasswordModal()">
+              <div class="dropdown-item-icon">🔑</div>
+              <div class="dropdown-item-text">
+                <div class="dropdown-item-label">Change Password</div>
+                <div class="dropdown-item-sublabel">Password update karein</div>
+              </div>
+            </button>
+
+            <div class="dropdown-divider"></div>
+
+            <button class="dropdown-item danger" onclick="logout()">
+              <div class="dropdown-item-icon">🚪</div>
+              <div class="dropdown-item-text">
+                <div class="dropdown-item-label">Logout</div>
+                <div class="dropdown-item-sublabel">Session end karein</div>
+              </div>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -821,6 +1149,74 @@
     </div>
   </main>
 
+  <!-- CHANGE PASSWORD MODAL -->
+  <div class="modal-overlay" id="changePasswordModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">🔑 Change Password</div>
+        <div class="modal-subtitle">Naya secure password set karein</div>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <input type="password" class="form-input" id="currentPassword" placeholder="Purana password daalo">
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input type="password" class="form-input" id="newPassword" placeholder="Naya password (min 6 characters)">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Confirm New Password</label>
+          <input type="password" class="form-input" id="confirmPassword" placeholder="Naya password dobara daalo">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal btn-cancel-modal" onclick="closeChangePasswordModal()">Cancel</button>
+        <button class="btn-modal btn-save-modal" onclick="saveNewPassword()">🔑 Update Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">👤 My Profile</div>
+        <div class="modal-subtitle">Account information</div>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-gray);border-radius:10px;">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--primary-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;" id="profileAvatar">BK</div>
+          <div>
+            <div style="font-size:18px;font-weight:700;color:var(--text-dark);" id="profileName">-</div>
+            <div style="font-size:13px;color:var(--text-light);" id="profileEmail">-</div>
+          </div>
+        </div>
+        <div style="display:grid;gap:12px;">
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--bg-gray);border-radius:8px;">
+            <span style="font-size:13px;color:var(--text-light);font-weight:500;">Role</span>
+            <span style="font-size:13px;font-weight:700;color:var(--primary-blue);" id="profileRole">-</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--bg-gray);border-radius:8px;">
+            <span style="font-size:13px;color:var(--text-light);font-weight:500;">Email</span>
+            <span style="font-size:13px;font-weight:600;color:var(--text-dark);" id="profileEmail2">-</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--bg-gray);border-radius:8px;">
+            <span style="font-size:13px;color:var(--text-light);font-weight:500;">System</span>
+            <span style="font-size:13px;font-weight:600;color:var(--text-dark);">RentComPro v1.0</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal btn-cancel-modal" onclick="closeProfileModal()">Close</button>
+        <button class="btn-modal btn-save-modal" onclick="openChangePasswordModal()">🔑 Change Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast-msg" id="toastMsg"></div>
+
   <script>
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const API_URL = isLocal ? 'http://localhost:8787' : 'https://rentcompro-backend.brajesh-jimmc.workers.dev';
@@ -880,7 +1276,18 @@
       }
       
       const userData = JSON.parse(user);
-      document.getElementById('userName').textContent = userData.email.split('@')[0];
+      const displayName = userData.email.split('@')[0];
+      const initials = displayName.substring(0, 2).toUpperCase();
+      const role = userData.role || 'SUPER_ADMIN';
+      const roleDisplay = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase().replace('_', ' ');
+
+      document.getElementById('userName').textContent = displayName;
+      document.getElementById('userRole').textContent = roleDisplay;
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('dropdownAvatar').textContent = initials;
+      document.getElementById('dropdownName').textContent = displayName;
+      document.getElementById('dropdownEmail').textContent = userData.email;
+      document.getElementById('dropdownRole').textContent = roleDisplay;
       
       loadDashboardData(token);
     }
@@ -915,16 +1322,121 @@
     
     // Logout
     function logout() {
-      if (confirm('Are you sure you want to logout?')) {
+      closeUserDropdown();
+      if (confirm('Kya aap logout karna chahte hain?')) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = '/index.html';
       }
     }
-    
-    // Toggle user menu
+
+    // Toggle user dropdown
     function toggleUserMenu() {
-      alert('User menu - Profile, Settings, Logout options will appear here');
+      const dropdown = document.getElementById('userDropdown');
+      const arrow = document.getElementById('dropdownArrow');
+      const isOpen = dropdown.classList.contains('open');
+      if (isOpen) {
+        closeUserDropdown();
+      } else {
+        dropdown.classList.add('open');
+        arrow.style.transform = 'rotate(180deg)';
+      }
+    }
+
+    function closeUserDropdown() {
+      const dropdown = document.getElementById('userDropdown');
+      const arrow = document.getElementById('dropdownArrow');
+      dropdown.classList.remove('open');
+      arrow.style.transform = '';
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      const wrapper = document.getElementById('userDropdownWrapper');
+      if (wrapper && !wrapper.contains(e.target)) {
+        closeUserDropdown();
+      }
+    });
+
+    // Profile Modal
+    function openProfileModal() {
+      closeUserDropdown();
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const email = user.email || '-';
+      const name = email.split('@')[0] || 'Admin';
+      const initials = name.substring(0, 2).toUpperCase();
+      const role = user.role || 'Super Admin';
+
+      document.getElementById('profileAvatar').textContent = initials;
+      document.getElementById('profileName').textContent = name;
+      document.getElementById('profileEmail').textContent = email;
+      document.getElementById('profileEmail2').textContent = email;
+      document.getElementById('profileRole').textContent = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase().replace('_', ' ');
+
+      document.getElementById('profileModal').classList.add('active');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').classList.remove('active');
+    }
+
+    // Change Password Modal
+    function openChangePasswordModal() {
+      closeUserDropdown();
+      closeProfileModal();
+      document.getElementById('currentPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('changePasswordModal').classList.add('active');
+    }
+
+    function closeChangePasswordModal() {
+      document.getElementById('changePasswordModal').classList.remove('active');
+    }
+
+    async function saveNewPassword() {
+      const currentPwd = document.getElementById('currentPassword').value.trim();
+      const newPwd = document.getElementById('newPassword').value.trim();
+      const confirmPwd = document.getElementById('confirmPassword').value.trim();
+
+      if (!currentPwd || !newPwd || !confirmPwd) {
+        showToastMsg('Sabhi fields fill karein!', 'error'); return;
+      }
+      if (newPwd.length < 6) {
+        showToastMsg('Password minimum 6 characters ka hona chahiye!', 'error'); return;
+      }
+      if (newPwd !== confirmPwd) {
+        showToastMsg('Naya password aur confirm password match nahi karta!', 'error'); return;
+      }
+
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`${API_URL}/api/auth/change-password`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ currentPassword: currentPwd, newPassword: newPwd })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToastMsg('Password successfully update ho gaya! ✅', 'success');
+          closeChangePasswordModal();
+        } else {
+          showToastMsg(data.message || data.error || 'Password update failed!', 'error');
+        }
+      } catch (err) {
+        showToastMsg('Network error! Please try again.', 'error');
+      }
+    }
+
+    // Toast
+    function showToastMsg(msg, type = 'success') {
+      const t = document.getElementById('toastMsg');
+      t.textContent = msg;
+      t.className = `toast-msg ${type} show`;
+      setTimeout(() => t.classList.remove('show'), 3500);
     }
     
     // Mobile sidebar

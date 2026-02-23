@@ -4,6 +4,7 @@ import type { Env, JWTPayload } from './types';
 import { testDatabaseConnection } from './utils/supabase';
 import { loginHandler } from './auth/login';
 import { logoutHandler } from './auth/logout';
+import { changePasswordHandler } from './auth/change-password';
 import { authMiddleware, requireRole } from './middleware/auth';
 import { getDashboardStats, getRecentActivity } from './dashboard/stats';
 import { addDevice, getDevices, getDevice, updateDevice, deleteDevice, selfRegisterDevice, getDeviceCount } from './devices/management';
@@ -85,6 +86,9 @@ app.get('/api/test-connection', async (c) => {
 
 // Login endpoint
 app.post('/api/auth/login', loginHandler);
+
+// Change password (protected)
+app.post('/api/auth/change-password', authMiddleware, changePasswordHandler);
 
 // ============================================
 // DEVICE AGENT ROUTES (Public - no auth, agents use deviceToken)

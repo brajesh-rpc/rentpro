@@ -256,7 +256,7 @@ export async function receiveDeviceStats(c: Context<{ Bindings: Env }>): Promise
         active_mac_address:    activeMacAddress,
         connection_type:       connectionType,
         ip_address:            ipAddress,
-        cpu_temperature:       cpuTemperature || cpuTemp || null,
+        cpu_temperature:       cpuTemperature != null ? cpuTemperature : (cpuTemp != null ? cpuTemp : null),
         disk_health:           diskHealth || null,
         windows_version:       windowsVersion || null,
         windows_build:         windowsBuild || null,
